@@ -10,7 +10,7 @@ const CONFIG = {
 const questions = [
     {
         id: 1,
-        text: "Hvilke porter må være åpne i brannmuren for å motta lyd fra en Tieline Via enhet?",
+        text: "Toby er onsite i oppgjøret mellom Gneist - Jubb FK. Han har med seg en via Tieline, men mener noen porter må være stengt i brannmuren for å motta lyd fra en Tieline Via enhet?",
         allowImage: true
     },
     {
