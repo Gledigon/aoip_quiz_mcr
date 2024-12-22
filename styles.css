@@ -181,59 +181,75 @@ textarea {
 }
 
 /* Print Styles */
+/* Print Styles */
 @media print {
     body {
-        background: white;
-        color: black;
+        background: var(--bg-primary);
+        color: var(--text-primary);
         padding: 0;
     }
 
-    .container { max-width: 100%; }
+    .container { 
+        max-width: 100%; 
+    }
 
     .header {
-        background: white;
-        border: none;
+        background: var(--bg-secondary);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 1rem;
         margin-bottom: 2rem;
     }
 
     .header h1 {
-        color: black !important;
-        -webkit-text-fill-color: black !important;
+        background: var(--gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         font-size: 24pt;
     }
 
     .group-info {
-        background: white;
-        border: 1px solid #ccc;
+        background: var(--bg-secondary);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 1rem;
         margin-bottom: 2rem;
     }
 
     .question-card {
-        background: white;
-        border: 1px solid #ccc;
+        background: var(--bg-secondary);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 1rem;
         margin-bottom: 2rem;
         break-inside: avoid;
         page-break-inside: avoid;
     }
 
-    .question-text { color: black !important; }
+    .question-text { 
+        color: var(--text-primary) !important; 
+    }
 
     textarea {
-        background: white;
-        border: 1px solid #ccc;
-        color: black;
+        background: var(--bg-accent);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
     }
 
     .btn-group,
-    .image-upload { display: none !important; }
+    .image-upload { 
+        display: none !important; 
+    }
 
     .preview-image {
         max-width: 500px;
         max-height: 300px;
         margin: 1rem 0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Forbedret lesbarhet for svar */
+    textarea, input {
+        background: var(--bg-accent) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
     }
 }
 
