@@ -134,14 +134,24 @@ function createQuestionCard(question, index) {
 }
 
 // Quiz Initialization
+let quizInitialized = false;
 function initQuiz() {
+    // Prevent multiple initializations
+    if (quizInitialized) return;
+
     const container = document.getElementById('questionContainer');
+    
+    // Clear any existing questions first
+    container.innerHTML = '';
+
     questions.forEach((question, index) => {
         container.appendChild(createQuestionCard(question, index));
     });
     
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('date').value = today;
+
+    quizInitialized = true;
 }
 
 // Initialize quiz when document is ready
