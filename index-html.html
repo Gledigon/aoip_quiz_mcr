@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="no" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta name="referrer" content="no-referrer">
+    <title>AoIP MCR Quiz - Dark Theme</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Mikkelsens AoIP Quiz</h1>
+            <p>Besvar spørsmålene og print/lagre som PDF</p>
+        </header>
+
+        <form id="quizForm" onsubmit="return validateForm(event)">
+            <div class="group-info">
+                <div class="form-group">
+                    <label for="groupName">Gruppenavn</label>
+                    <input 
+                        type="text" 
+                        id="groupName" 
+                        name="groupName"
+                        required 
+                        pattern="[A-Za-zÆØÅæøå0-9\s\-_]{2,50}"
+                        placeholder="Skriv inn navnet på gruppen"
+                        maxlength="50"
+                        onkeyup="sanitizeInput(this)"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="date">Dato</label>
+                    <input 
+                        type="date" 
+                        id="date" 
+                        name="date"
+                        required
+                        min="2024-01-01"
+                    >
+                </div>
+            </div>
+
+            <div id="questionContainer"></div>
+
+            <div class="btn-group">
+                <button type="button" class="btn" onclick="validateAndPrint()">Print/Lagre som PDF</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="quiz-config.js"></script>
+    <script src="quiz-functions.js"></script>
+</body>
+</html>
