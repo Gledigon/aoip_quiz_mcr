@@ -10,7 +10,8 @@ const CONFIG = {
 const questions = [
     {
         id: 1,
-        text: "Toby er onsite i oppgjøret mellom Gneist - Jubb FK. Han har med seg en via Tieline, men mener noen porter må være stengt i brannmuren for å motta lyd fra en Tieline Via. Dere ringer nettverk og ønsker å få klarhet i dette. Hva spør dere om? ",
+        text: "Toby er onsite i oppgjøret mellom Gneist - Jubb FK. Han har med seg en via Tieline, men mener noen porter må være stengt i brannmuren for å motta lyd fra en Tieline Via",
+        text: "Dere ringer nettverk og ønsker å få klarhet i dette. Hva spør dere om? ",
         allowImage: true
     },
     {
