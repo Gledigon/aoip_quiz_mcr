@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; connect-src 'self';">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="no-referrer">
     
     <meta http-equiv='cache-control' content='no-cache, no-store, must-revalidate'> 
@@ -23,18 +24,68 @@
         </div>
     </div>
 
+    <!-- Keyboard Shortcuts Help -->
+    <div class="shortcuts-help" id="shortcutsHelp">
+        <h4>Hurtigtaster</h4>
+        <div class="shortcut-item">
+            <span class="shortcut-key">Ctrl + S</span>
+            <span>Lagre fremgang</span>
+        </div>
+        <div class="shortcut-item">
+            <span class="shortcut-key">Alt + P</span>
+            <span>Skriv ut</span>
+        </div>
+        <div class="shortcut-item">
+            <span class="shortcut-key">Alt + H</span>
+            <span>Vis/Skjul hurtigtaster</span>
+        </div>
+        <div class="shortcut-item" id="adminShortcuts" style="display: none;">
+            <span class="shortcut-key">Alt + N</span>
+            <span>Nytt spørsmål</span>
+        </div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <div id="theme-toggle" class="theme-toggle" title="Bytt tema">
+        <i class="fas fa-moon"></i>
+    </div>
+
     <!-- Main Content -->
     <div id="main-content" class="container">
-        <div id="theme-toggle" class="theme-toggle">
-            <i class="fas fa-moon"></i>
+        <!-- Admin Panel (hidden by default) -->
+        <div id="adminPanel" class="admin-panel" style="display: none;">
+            <div class="admin-header">
+                <h2>Administrasjonspanel</h2>
+                <div class="admin-controls">
+                    <button class="btn" onclick="ADMIN.addQuestion()">Legg til spørsmål</button>
+                    <button class="btn btn-secondary" onclick="ADMIN.toggleStatistics()">Vis statistikk</button>
+                </div>
+            </div>
+            <div id="questionList" class="question-list"></div>
+            <div id="statisticsPanel" class="stats-panel" style="display: none;">
+                <h3>Statistikk</h3>
+                <div id="statsContent"></div>
+            </div>
         </div>
 
+        <!-- Main Header -->
         <header class="header">
             <h1>Mikkelsens AoIP Quiz</h1>
             <p>Besvar spørsmålene og print/lagre som PDF</p>
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-stats">
+                    <span id="completedQuestions">0</span>/<span id="totalQuestions">0</span> spørsmål besvart
+                </div>
+            </div>
         </header>
 
+        <!-- Main Form -->
         <form id="quizForm" onsubmit="return validateForm(event)">
+            <!-- Group Info -->
             <div class="group-info">
                 <div class="form-group">
                     <label for="groupName">Gruppenavn</label>
@@ -61,19 +112,52 @@
                 </div>
             </div>
 
+            <!-- Questions Container -->
             <div id="questionContainer"></div>
 
+            <!-- Action Buttons -->
             <div class="btn-group">
                 <button type="submit" class="btn">Lagre svar</button>
-                <button type="button" class="btn" onclick="validateAndPrint()">Print/Lagre som PDF</button>
-                <button type="button" class="btn btn-secondary" onclick="resetQuiz()">Tilbakestill</button>
+                <button type="button" class="btn btn-secondary" onclick="EXPORT.exportToPDF()">
+                    Eksporter som PDF
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="EXPORT.shareViaEmail()">
+                    Del via e-post
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="EXPORT.generateShareableLink()">
+                    Generer delbar lenke
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="validateAndPrint()">
+                    Skriv ut
+                </button>
+                <button type="button" class="btn btn-danger" onclick="resetQuiz()">
+                    Tilbakestill
+                </button>
             </div>
         </form>
+
+        <!-- Save Indicator -->
+        <div id="saveIndicator" class="save-indicator">
+            Lagret
+        </div>
     </div>
 
+    <!-- Timer Display -->
+    <div id="timerContainer" class="timer-container">
+        <div class="timer-icon">⏱</div>
+        <div id="timerDisplay">30:00</div>
+    </div>
+
+    <!-- Scripts -->
     <script src="quiz-config.js"></script>
     <script src="quiz-functions.js"></script>
+    <script src="admin-panel.js"></script>
+    <script src="export-functions.js"></script>
+    <script src="enhanced-ui.js"></script>
     <script src="splash-screen.js"></script>
     <script src="theme-toggle.js"></script>
+
+    <!-- External Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </body>
 </html>
