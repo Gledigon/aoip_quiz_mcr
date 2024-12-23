@@ -1,13 +1,12 @@
-// Configuration settings
+// Security Configuration
 const CONFIG = {
     maxFileSize: 5 * 1024 * 1024, // 5MB
     allowedImageTypes: ['image/jpeg', 'image/png', 'image/gif'],
     maxAnswerLength: 2000,
-    maxGroupNameLength: 50,
-    autosaveInterval: 30000 // Autosave every 30 seconds
+    maxGroupNameLength: 50
 };
 
-// Quiz questions
+// Quiz Questions
 const QUESTIONS = [
     {
         id: 1,
