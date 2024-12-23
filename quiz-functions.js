@@ -1,5 +1,5 @@
-// Quiz Functions
-const questions = [
+// Hardcoded Questions
+var questions = [
     {
         id: 1,
         text: "Hvilke porter må være åpne i brannmuren for å motta lyd fra en Tieline Via enhet?",
@@ -17,6 +17,7 @@ const questions = [
     }
 ];
 
+// Sanitize Input
 function sanitizeInput(element) {
     const clean = element.value.replace(/[<>]/g, '');
     if (clean !== element.value) {
@@ -24,6 +25,7 @@ function sanitizeInput(element) {
     }
 }
 
+// Validate Form
 function validateForm(event) {
     if (event) event.preventDefault();
     
@@ -38,108 +40,47 @@ function validateForm(event) {
     return true;
 }
 
+// Print Function
 function validateAndPrint() {
     if (validateForm()) {
         window.print();
     }
 }
 
+// Initialize Quiz
 function initQuiz() {
+    console.log('Initiating quiz...');
     const container = document.getElementById('questionContainer');
     
-    // Check if questions are already loaded
-    if (container.children.length > 0) {
-        console.log('Questions already loaded');
-        return;
-    }
-
     if (!container) {
-        console.error('Feil: Finner ikke spørsmålsbeholderen!');
+        console.error('FEIL: Kan ikke finne spørsmålsbeholderen!');
         return;
     }
 
+    // Clear any existing content
+    container.innerHTML = '';
+
+    // Create question cards
     questions.forEach((question, index) => {
         const card = document.createElement('div');
+        card.className = 'question-card';
         card.innerHTML = `
-            <h3>Spørsmål ${index + 1}</h3>
-            <p>${question.text}</p>
+            <div class="question-header">
+                <div class="question-number">${index + 1}</div>
+                <div class="question-text">${question.text}</div>
+            </div>
             <textarea 
                 id="answer-${question.id}" 
                 placeholder="${question.placeholder}"
                 style="width: 100%; height: 200px;"
-                onpaste="handlePastedImage(event, ${question.id})"
             ></textarea>
-            <div id="image-container-${question.id}" class="image-container"></div>
-            <input 
-                type="file" 
-                accept="image/*" 
-                style="margin-top: 10px;"
-                onchange="handleFileUpload(event, ${question.id})"
-            >
         `;
         container.appendChild(card);
     });
+
+    console.log('Quiz initialized with ' + questions.length + ' questions');
 }
 
-function handlePastedImage(event, questionId) {
-    const items = event.clipboardData.items;
-    const container = document.getElementById(`image-container-${questionId}`);
-
-    for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf("image") !== -1) {
-            const blob = items[i].getAsFile();
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.style.maxWidth = '100%';
-                img.style.maxHeight = '300px';
-                img.style.margin = '10px 0';
-
-                const removeBtn = document.createElement('button');
-                removeBtn.textContent = 'Fjern bilde';
-                removeBtn.onclick = () => {
-                    container.removeChild(img);
-                    container.removeChild(removeBtn);
-                };
-
-                container.appendChild(img);
-                container.appendChild(removeBtn);
-            };
-
-            reader.readAsDataURL(blob);
-        }
-    }
-}
-
-function handleFileUpload(event, questionId) {
-    const file = event.target.files[0];
-    const container = document.getElementById(`image-container-${questionId}`);
-
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.style.maxWidth = '100%';
-            img.style.maxHeight = '300px';
-            img.style.margin = '10px 0';
-
-            const removeBtn = document.createElement('button');
-            removeBtn.textContent = 'Fjern bilde';
-            removeBtn.onclick = () => {
-                container.removeChild(img);
-                container.removeChild(removeBtn);
-                event.target.value = ''; // Reset file input
-            };
-
-            container.appendChild(img);
-            container.appendChild(removeBtn);
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-// Kjør initialisering når dokumentet er lastet
+// Multiple initialization methods
 document.addEventListener('DOMContentLoaded', initQuiz);
+window.addEventListener('load', initQuiz);
