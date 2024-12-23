@@ -45,6 +45,7 @@ function createQuestionCard(question, index) {
             placeholder="${question.placeholder}"
             onchange="saveAnswer(${question.id}, this.value)"
             ${question.required ? 'required' : ''}
+            maxlength="${CONFIG.maxAnswerLength}"
         >${quizState.answers[question.id] || ''}</textarea>
         ${question.allowImage ? createImageUploadSection(question.id) : ''}
     `;
@@ -67,54 +68,15 @@ function createImageUploadSection(questionId) {
                 style="display: none"
             >
             <div id="image-preview-${questionId}" class="image-preview"></div>
+            <button 
+                type="button" 
+                class="btn-danger btn-remove-image" 
+                onclick="removeImage(${questionId})"
+                style="display: none;">
+                Fjern bilde
+            </button>
         </div>
     `;
-}
-
-async function compressImage(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-                
-                // Max dimensions
-                const MAX_WIDTH = 1024;
-                const MAX_HEIGHT = 1024;
-
-                if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                } else {
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                    }
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-
-                canvas.toBlob(
-                    (blob) => resolve(new File([blob], file.name, { type: 'image/jpeg' })),
-                    'image/jpeg',
-                    0.7
-                );
-            };
-            img.onerror = reject;
-            img.src = e.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
 }
 
 async function handleImageUpload(questionId, input) {
@@ -130,39 +92,91 @@ async function handleImageUpload(questionId, input) {
             throw new Error('Filen er for stor. Maksimal størrelse er 5MB.');
         }
 
-        const compressedImage = await compressImage(file);
+        // Show loading indicator
+        const uploadSection = document.getElementById(`upload-${questionId}`);
+        if (uploadSection) {
+            uploadSection.classList.add('loading');
+        }
+
+        const compressedImage = await UTILS.image.compress(file);
         
         const reader = new FileReader();
         reader.onload = function(e) {
             updateImagePreview(questionId, e.target.result);
             quizState.images[questionId] = e.target.result;
             saveState();
+            
+            // Show remove button
+            const removeButton = uploadSection?.querySelector('.btn-remove-image');
+            if (removeButton) {
+                removeButton.style.display = 'block';
+            }
         };
-        reader.onerror = function(e) {
+        reader.onerror = function() {
             throw new Error('Kunne ikke lese filen.');
         };
         reader.readAsDataURL(compressedImage);
     } catch (error) {
         console.error('Image upload error:', error);
-        showNotification(error.message || 'Kunne ikke laste opp bilde', 'error');
+        UTILS.notification.show(error.message || 'Kunne ikke laste opp bilde', 'error');
         input.value = '';
+    } finally {
+        // Remove loading indicator
+        const uploadSection = document.getElementById(`upload-${questionId}`);
+        if (uploadSection) {
+            uploadSection.classList.remove('loading');
+        }
+    }
+}
+
+function removeImage(questionId) {
+    try {
+        // Remove image from state
+        delete quizState.images[questionId];
+        saveState();
+
+        // Clear file input
+        const input = document.getElementById(`image-${questionId}`);
+        if (input) {
+            input.value = '';
+        }
+
+        // Clear preview
+        updateImagePreview(questionId, null);
+
+        // Hide remove button
+        const removeButton = document.querySelector(`#upload-${questionId} .btn-remove-image`);
+        if (removeButton) {
+            removeButton.style.display = 'none';
+        }
+
+        UTILS.notification.show('Bilde fjernet', 'success');
+    } catch (error) {
+        console.error('Remove image error:', error);
+        UTILS.notification.show('Kunne ikke fjerne bilde', 'error');
     }
 }
 
 function updateImagePreview(questionId, imageData) {
     const preview = document.getElementById(`image-preview-${questionId}`);
     if (preview) {
-        preview.innerHTML = `<img src="${imageData}" alt="Forhåndsvisning" class="preview-image">`;
+        preview.innerHTML = imageData 
+            ? `<img src="${imageData}" alt="Forhåndsvisning" class="preview-image">` 
+            : '';
     }
 }
 
 function saveAnswer(questionId, value) {
     try {
-        quizState.answers[questionId] = value;
+        if (value.length > CONFIG.maxAnswerLength) {
+            value = value.substring(0, CONFIG.maxAnswerLength);
+        }
+        
+        quizState.answers[questionId] = UTILS.string.sanitize(value);
         saveState();
     } catch (error) {
         console.error('Save answer error:', error);
-        showNotification('Kunne ikke lagre svar', 'error');
+        UTILS.notification.show('Kunne ikke lagre svar', 'error');
     }
 }
 
@@ -172,30 +186,30 @@ function saveState() {
         if (serializedState.length > 5242880) { // 5MB
             throw new Error('Dataene er for store til å lagre');
         }
-        localStorage.setItem('quizState', serializedState);
+        localStorage.setItem(CONFIG.storagePrefix.quiz, serializedState);
         localStorage.setItem('lastSaved', new Date().toISOString());
         showSaveIndicator();
     } catch (error) {
         console.error('Save state error:', error);
-        showNotification('Kunne ikke lagre fremgang', 'error');
+        UTILS.notification.show('Kunne ikke lagre fremgang', 'error');
     }
 }
 
 function loadSavedState() {
     try {
-        const saved = localStorage.getItem('quizState');
+        const saved = localStorage.getItem(CONFIG.storagePrefix.quiz);
         if (saved) {
             const parsedState = JSON.parse(saved);
             // Handle version updates if needed
             quizState = {
-                version: '1.0',
+                version: CONFIG.storageVersion,
                 answers: parsedState.answers || {},
                 images: parsedState.images || {}
             };
         }
     } catch (error) {
         console.error('Load state error:', error);
-        showNotification('Kunne ikke laste lagret fremgang', 'error');
+        UTILS.notification.show('Kunne ikke laste lagret fremgang', 'error');
     }
 }
 
@@ -210,10 +224,14 @@ function restoreSavedAnswers() {
 
         Object.entries(quizState.images).forEach(([questionId, imageData]) => {
             updateImagePreview(questionId, imageData);
+            const removeButton = document.querySelector(`#upload-${questionId} .btn-remove-image`);
+            if (removeButton) {
+                removeButton.style.display = 'block';
+            }
         });
     } catch (error) {
         console.error('Restore answers error:', error);
-        showNotification('Kunne ikke gjenopprette svarene', 'error');
+        UTILS.notification.show('Kunne ikke gjenopprette svarene', 'error');
     }
 }
 
@@ -228,6 +246,14 @@ function validateForm(event) {
             throw new Error('Vennligst fyll ut alle påkrevde felt');
         }
 
+        if (!VALIDATION.validateGroupName(groupName)) {
+            throw new Error('Ugyldig gruppenavn format');
+        }
+
+        if (!VALIDATION.validateDate(date)) {
+            throw new Error('Ugyldig dato');
+        }
+
         const unansweredQuestions = QUESTIONS
             .filter(q => q.required && !quizState.answers[q.id])
             .map(q => q.id);
@@ -236,5 +262,52 @@ function validateForm(event) {
             throw new Error(`Vennligst svar på alle påkrevde spørsmål (${unansweredQuestions.join(', ')})`);
         }
 
+        // Validate answer lengths
+        for (const question of QUESTIONS) {
+            const answer = quizState.answers[question.id];
+            if (answer && !VALIDATION.validateAnswer(answer, question.id)) {
+                throw new Error(`Svaret på spørsmål ${question.id} er for kort eller for langt`);
+            }
+        }
+
         saveState();
-        showSaveIndicator('Svar
+        showSaveIndicator('Svar lagret');
+        return true;
+    } catch (error) {
+        console.error('Form validation error:', error);
+        UTILS.notification.show(error.message || 'Kunne ikke validere skjema', 'error');
+        return false;
+    }
+}
+
+function showSaveIndicator(message = 'Lagret') {
+    const indicator = UTILS.dom.create('div', {
+        className: 'save-indicator'
+    }, [message]);
+    
+    document.body.appendChild(indicator);
+    
+    setTimeout(() => {
+        indicator.classList.add('fade-out');
+        setTimeout(() => indicator.remove(), CONFIG.fadeOutDuration);
+    }, CONFIG.notificationDuration);
+}
+
+function validateAndPrint() {
+    if (validateForm()) {
+        window.print();
+    }
+}
+
+// Setup admin panel if user is admin
+function setupAdminPanel() {
+    if (AUTH.isAdmin()) {
+        const adminPanel = document.getElementById('adminPanel');
+        if (adminPanel) {
+            adminPanel.style.display = 'block';
+        }
+    }
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', initQuiz);
