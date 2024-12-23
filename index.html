@@ -15,7 +15,20 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <h1>AoIP Quiz</h1>
+            <p>Laster inn... <span id="countdown">4</span></p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="container">
+        <div id="theme-toggle" class="theme-toggle">
+            <i class="fas fa-moon"></i>
+        </div>
+
         <header class="header">
             <h1>Mikkelsens AoIP Quiz</h1>
             <p>Besvar spørsmålene og print/lagre som PDF</p>
@@ -51,12 +64,16 @@
             <div id="questionContainer"></div>
 
             <div class="btn-group">
+                <button type="submit" class="btn">Lagre svar</button>
                 <button type="button" class="btn" onclick="validateAndPrint()">Print/Lagre som PDF</button>
+                <button type="button" class="btn btn-secondary" onclick="resetQuiz()">Tilbakestill</button>
             </div>
         </form>
     </div>
 
     <script src="quiz-config.js"></script>
     <script src="quiz-functions.js"></script>
+    <script src="splash-screen.js"></script>
+    <script src="theme-toggle.js"></script>
 </body>
 </html>
