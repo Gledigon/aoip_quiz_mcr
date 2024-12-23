@@ -6,9 +6,13 @@ let quizState = {
 
 // Initialize Quiz
 function initQuiz() {
+    if (!AUTH.isAuthenticated()) {
+        return;
+    }
+    
     loadSavedState();
     renderQuiz();
-    setupAutosave();
+    setupAdminPanel();
 }
 
 function renderQuiz() {
@@ -102,6 +106,7 @@ function saveState() {
     try {
         localStorage.setItem('quizState', JSON.stringify(quizState));
         localStorage.setItem('lastSaved', new Date().toISOString());
+        showSaveIndicator();
     } catch (error) {
         console.error('Feil ved lagring av tilstand:', error);
     }
@@ -156,14 +161,8 @@ function validateForm(event) {
     }
 
     saveState();
+    showSaveIndicator('Svar lagret!');
     return true;
-}
-
-// Autosave Setup
-function setupAutosave() {
-    setInterval(() => {
-        saveState();
-    }, CONFIG.autosaveInterval);
 }
 
 // Print Function
@@ -173,12 +172,33 @@ function validateAndPrint() {
     }
 }
 
-// Cleanup Function
-function resetQuiz() {
-    if (confirm('Er du sikker på at du vil tilbakestille alle svar?')) {
-        localStorage.removeItem('quizState');
-        quizState = { answers: {}, images: {} };
-        renderQuiz();
+// UI Helpers
+function showSaveIndicator(message = 'Lagret') {
+    const indicator = document.createElement('div');
+    indicator.className = 'save-indicator';
+    indicator.textContent = message;
+    document.body.appendChild(indicator);
+    
+    setTimeout(() => {
+        indicator.classList.add('fade-out');
+        setTimeout(() => indicator.remove(), 300);
+    }, 2000);
+}
+
+function sanitizeInput(element) {
+    const clean = element.value.replace(/[<>]/g, '');
+    if (clean !== element.value) {
+        element.value = clean;
+    }
+}
+
+// Setup admin panel if user is admin
+function setupAdminPanel() {
+    if (AUTH.isAdmin()) {
+        const adminPanel = document.getElementById('adminPanel');
+        if (adminPanel) {
+            adminPanel.style.display = 'block';
+        }
     }
 }
 
