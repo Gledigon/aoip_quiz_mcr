@@ -1,4 +1,4 @@
-// Simplified Quiz Functions with Image Support
+// Quiz Functions
 const questions = [
     {
         id: 1,
@@ -44,11 +44,41 @@ function validateAndPrint() {
     }
 }
 
-function createImageContainer(questionId) {
-    const container = document.createElement('div');
-    container.id = `image-container-${questionId}`;
-    container.className = 'image-container';
-    return container;
+function initQuiz() {
+    const container = document.getElementById('questionContainer');
+    
+    // Check if questions are already loaded
+    if (container.children.length > 0) {
+        console.log('Questions already loaded');
+        return;
+    }
+
+    if (!container) {
+        console.error('Feil: Finner ikke spørsmålsbeholderen!');
+        return;
+    }
+
+    questions.forEach((question, index) => {
+        const card = document.createElement('div');
+        card.innerHTML = `
+            <h3>Spørsmål ${index + 1}</h3>
+            <p>${question.text}</p>
+            <textarea 
+                id="answer-${question.id}" 
+                placeholder="${question.placeholder}"
+                style="width: 100%; height: 200px;"
+                onpaste="handlePastedImage(event, ${question.id})"
+            ></textarea>
+            <div id="image-container-${question.id}" class="image-container"></div>
+            <input 
+                type="file" 
+                accept="image/*" 
+                style="margin-top: 10px;"
+                onchange="handleFileUpload(event, ${question.id})"
+            >
+        `;
+        container.appendChild(card);
+    });
 }
 
 function handlePastedImage(event, questionId) {
@@ -83,64 +113,32 @@ function handlePastedImage(event, questionId) {
     }
 }
 
-function initQuiz() {
-    const container = document.getElementById('questionContainer');
-    
-    if (!container) {
-        alert('Feil: Finner ikke spørsmålsbeholderen!');
-        return;
-    }
+function handleFileUpload(event, questionId) {
+    const file = event.target.files[0];
+    const container = document.getElementById(`image-container-${questionId}`);
 
-    container.innerHTML = ''; // Tøm tidligere innhold
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.maxWidth = '100%';
+            img.style.maxHeight = '300px';
+            img.style.margin = '10px 0';
 
-    questions.forEach((question, index) => {
-        const card = document.createElement('div');
-        card.innerHTML = `
-            <h3>Spørsmål ${index + 1}</h3>
-            <p>${question.text}</p>
-            <textarea 
-                id="answer-${question.id}" 
-                placeholder="${question.placeholder}"
-                style="width: 100%; height: 200px;"
-                onpaste="handlePastedImage(event, ${question.id})"
-            ></textarea>
-            <div id="image-container-${question.id}" class="image-container"></div>
-        `;
-        container.appendChild(card);
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Fjern bilde';
+            removeBtn.onclick = () => {
+                container.removeChild(img);
+                container.removeChild(removeBtn);
+                event.target.value = ''; // Reset file input
+            };
 
-        // Add file upload option
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.style.marginTop = '10px';
-        fileInput.onchange = function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const container = document.getElementById(`image-container-${question.id}`);
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.maxWidth = '100%';
-                    img.style.maxHeight = '300px';
-                    img.style.margin = '10px 0';
-
-                    const removeBtn = document.createElement('button');
-                    removeBtn.textContent = 'Fjern bilde';
-                    removeBtn.onclick = () => {
-                        container.removeChild(img);
-                        container.removeChild(removeBtn);
-                        fileInput.value = ''; // Reset file input
-                    };
-
-                    container.appendChild(img);
-                    container.appendChild(removeBtn);
-                };
-                reader.readAsDataURL(file);
-            }
+            container.appendChild(img);
+            container.appendChild(removeBtn);
         };
-        card.appendChild(fileInput);
-    });
+        reader.readAsDataURL(file);
+    }
 }
 
 // Kjør initialisering når dokumentet er lastet
