@@ -31,26 +31,6 @@
 
     <!-- Main Content -->
     <div id="main-content" class="container">
-        <!-- Admin Panel -->
-        <div id="adminPanel" class="admin-panel" style="display: none;">
-            <div class="admin-header">
-                <h2>Administrasjonspanel</h2>
-                <div class="admin-controls">
-                    <button class="btn" onclick="ADMIN.addQuestion()">
-                        <i class="fas fa-plus"></i> Legg til spørsmål
-                    </button>
-                    <button class="btn btn-secondary" onclick="ADMIN.toggleStatistics()">
-                        <i class="fas fa-chart-bar"></i> Vis statistikk
-                    </button>
-                </div>
-            </div>
-            <div id="questionList" class="question-list"></div>
-            <div id="statisticsPanel" class="stats-panel" style="display: none;">
-                <h3>Statistikk</h3>
-                <div id="statsContent"></div>
-            </div>
-        </div>
-
         <!-- Main Header -->
         <header class="header">
             <h1>Mikkelsens AoIP Quiz</h1>
@@ -126,7 +106,6 @@
     
     <!-- Load Additional Features -->
     <script src="theme-toggle.js"></script>
-    <script src="admin-panel.js"></script>
     <script src="export-functions.js"></script>
     
     <!-- HTML2PDF for PDF Export -->
