@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('theme-toggle');
     const htmlElement = document.documentElement;
 
-    // Initialize theme from localStorage
+    // Initializing theme from localStorage
     const savedTheme = localStorage.getItem('aoipQuizTheme') || 'dark';
     htmlElement.classList.toggle('dark', savedTheme === 'dark');
     htmlElement.classList.toggle('light', savedTheme === 'light');
