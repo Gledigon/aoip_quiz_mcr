@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const mainContent = document.getElementById('main-content');
     const countdownElement = document.getElementById('countdown');
 
+    // Debugging
+    console.log('Splash screen script loaded');
+
     // Show splash screen and hide main content initially
     splashScreen.style.display = 'flex';
     mainContent.style.display = 'none';
@@ -22,8 +25,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 mainContent.style.display = 'block';
                 
                 // Ensure quiz is initialized
+                console.log('Calling initQuiz()');
                 if (typeof initQuiz === 'function') {
                     initQuiz();
+                } else {
+                    console.error('initQuiz function not found!');
                 }
             }, 500);
         }
