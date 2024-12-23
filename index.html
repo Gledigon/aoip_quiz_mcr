@@ -7,24 +7,40 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="no-referrer">
-    <title>AoIP MCR Quiz - Dark Theme</title>
+    <title>AoIP Challenge - Mikkelsens Institutt</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <div id="theme-toggle" class="theme-toggle">
+        <i class="fas fa-moon"></i>
+    </div>
+
     <div id="splash-screen" class="splash-screen">
         <div class="splash-content">
             <h1>AoIP Challenge</h1>
             <p class="splash-subtitle">Utviklet av Mikkelsens Institutt</p>
             <div class="splash-divider"></div>
-            <p class="splash-description">Besvar spørsmålene grundig og prøv å vise dypliggende forståelse</p>
+            <p class="splash-description">Besvar spørsmålene grundig og vis dypere forståelse</p>
+            <div class="splash-countdown">Starter om <span id="countdown">4</span> sekunder</div>
         </div>
     </div>
 
     <div id="main-content" class="container" style="display: none;">
         <header class="header">
-            <h1>Gleditsch AoIP challenge </h1>
+            <div class="header-content">
+                <h1>Gleditsch AoIP Challenge</h1>
+                <div class="timer-section">
+                    <i class="fas fa-clock"></i>
+                    <span id="quiz-timer">2:00:00</span>
+                </div>
+            </div>
             <p>Besvar spørsmålene grundig og print/lagre som PDF</p>
         </header>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
 
         <form id="quizForm" onsubmit="return validateForm(event)">
             <div class="group-info">
@@ -56,13 +72,36 @@
             <div id="questionContainer"></div>
 
             <div class="btn-group">
-                <button type="button" class="btn" onclick="validateAndPrint()">Print/Lagre som PDF</button>
+                <button type="button" class="btn btn-save" onclick="saveProgress()">
+                    <i class="fas fa-save"></i> Lagre utkast
+                </button>
+                <button type="button" class="btn btn-submit" onclick="validateAndSubmit()">
+                    <i class="fas fa-paper-plane"></i> Send inn besvarelse
+                </button>
+                <button type="button" class="btn btn-print" onclick="validateAndPrint()">
+                    <i class="fas fa-print"></i> Print/Lagre som PDF
+                </button>
             </div>
         </form>
+
+        <div id="help-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>Quiz Instruksjoner</h2>
+                <p>Velkommen til AoIP Challenge. Her er noen viktige instruksjoner:</p>
+                <ul>
+                    <li>Du har 2 timer til å fullføre quizen</li>
+                    <li>Svarene dine lagres automatisk hvert 30. sekund</li>
+                    <li>Last opp relevante bilder for å støtte dine svar</li>
+                    <li>Bruk god tid og vis grundig forståelse</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <script src="quiz-config.js"></script>
     <script src="quiz-functions.js"></script>
     <script src="splash-screen.js"></script>
+    <script src="theme-toggle.js"></script>
 </body>
 </html>
