@@ -1,4 +1,22 @@
-// Quiz Functions with Debugging
+// Simplified Quiz Functions with Image Support
+const questions = [
+    {
+        id: 1,
+        text: "Hvilke porter må være åpne i brannmuren for å motta lyd fra en Tieline Via enhet?",
+        placeholder: "Beskriv nødvendige porter og protokoller..."
+    },
+    {
+        id: 2,
+        text: "Hvordan verifiserer du at du mottar lyd fra en Prodys Quantum sender?",
+        placeholder: "Forklar fremgangsmåten for lydverifisering..."
+    },
+    {
+        id: 3,
+        text: "Hva gjør du hvis lydstrømmen fra en Tieline Via plutselig forsvinner?",
+        placeholder: "Beskriv feilsøkingstrinn..."
+    }
+];
+
 function sanitizeInput(element) {
     const clean = element.value.replace(/[<>]/g, '');
     if (clean !== element.value) {
@@ -26,71 +44,104 @@ function validateAndPrint() {
     }
 }
 
-// Question Card Creation
-function createQuestionCard(question, index) {
-    const card = document.createElement('div');
-    card.className = 'question-card';
-    
-    const content = `
-        <div class="question-header">
-            <div class="question-number">${index + 1}</div>
-            <div class="question-text">${question.text}</div>
-        </div>
-        <textarea 
-            id="answer-${question.id}"
-            name="answer-${question.id}"
-            placeholder="${question.placeholder || 'Skriv svaret ditt her...'}"
-            maxlength="10000"
-        ></textarea>
-    `;
-    
-    card.innerHTML = content;
-    return card;
+function createImageContainer(questionId) {
+    const container = document.createElement('div');
+    container.id = `image-container-${questionId}`;
+    container.className = 'image-container';
+    return container;
 }
 
-// Debug function to log questions
-function logQuestions() {
-    console.log('Questions:', questions);
-    console.log('Number of questions:', questions.length);
+function handlePastedImage(event, questionId) {
+    const items = event.clipboardData.items;
+    const container = document.getElementById(`image-container-${questionId}`);
+
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+            const blob = items[i].getAsFile();
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '300px';
+                img.style.margin = '10px 0';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Fjern bilde';
+                removeBtn.onclick = () => {
+                    container.removeChild(img);
+                    container.removeChild(removeBtn);
+                };
+
+                container.appendChild(img);
+                container.appendChild(removeBtn);
+            };
+
+            reader.readAsDataURL(blob);
+        }
+    }
 }
 
-// Quiz Initialization
 function initQuiz() {
     const container = document.getElementById('questionContainer');
     
-    // Debugging
-    console.log('Initializing quiz...');
-    logQuestions();
-
-    // Ensure container exists
     if (!container) {
-        console.error('Question container not found!');
-        return;
-    }
-    
-    // Clear any existing questions first
-    container.innerHTML = '';
-
-    // Defensive check for questions
-    if (!questions || questions.length === 0) {
-        console.error('No questions found!');
+        alert('Feil: Finner ikke spørsmålsbeholderen!');
         return;
     }
 
-    // Create question cards
+    container.innerHTML = ''; // Tøm tidligere innhold
+
     questions.forEach((question, index) => {
-        const questionCard = createQuestionCard(question, index);
-        container.appendChild(questionCard);
-        console.log(`Added question ${index + 1}`);
+        const card = document.createElement('div');
+        card.innerHTML = `
+            <h3>Spørsmål ${index + 1}</h3>
+            <p>${question.text}</p>
+            <textarea 
+                id="answer-${question.id}" 
+                placeholder="${question.placeholder}"
+                style="width: 100%; height: 200px;"
+                onpaste="handlePastedImage(event, ${question.id})"
+            ></textarea>
+            <div id="image-container-${question.id}" class="image-container"></div>
+        `;
+        container.appendChild(card);
+
+        // Add file upload option
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.marginTop = '10px';
+        fileInput.onchange = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const container = document.getElementById(`image-container-${question.id}`);
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '300px';
+                    img.style.margin = '10px 0';
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'Fjern bilde';
+                    removeBtn.onclick = () => {
+                        container.removeChild(img);
+                        container.removeChild(removeBtn);
+                        fileInput.value = ''; // Reset file input
+                    };
+
+                    container.appendChild(img);
+                    container.appendChild(removeBtn);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        card.appendChild(fileInput);
     });
-    
-    // Set today's date
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('date').value = today;
 }
 
-// Initialize quiz when document is ready
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM fully loaded');
-    initQuiz();
-});
+// Kjør initialisering når dokumentet er lastet
+document.addEventListener('DOMContentLoaded', initQuiz);
