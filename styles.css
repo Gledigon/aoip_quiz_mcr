@@ -29,7 +29,6 @@ body {
     margin: 0 auto;
 }
 
-/* Theme Toggle */
 .theme-toggle {
     position: fixed;
     top: 20px;
@@ -46,7 +45,6 @@ body {
     z-index: 1000;
 }
 
-/* Splash Screen Styles */
 .splash-screen {
     position: fixed;
     top: 0;
@@ -87,7 +85,6 @@ body {
     letter-spacing: 2px;
 }
 
-/* Header Styles */
 .header {
     text-align: center;
     padding: 2rem;
@@ -105,7 +102,6 @@ body {
     margin-bottom: 1rem;
 }
 
-/* Form Styles */
 .group-info {
     background: var(--bg-secondary);
     padding: 2rem;
@@ -137,7 +133,6 @@ body {
     font-size: 1rem;
 }
 
-/* Question Card Styles */
 .question-card {
     background: var(--bg-secondary);
     padding: 1.5rem;
@@ -149,14 +144,6 @@ body {
 
 .question-card:hover {
     transform: translateY(-2px);
-}
-
-.question-card h3 {
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-    background: var(--gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 textarea {
@@ -172,27 +159,6 @@ textarea {
     resize: vertical;
 }
 
-/* Image Container Styles */
-.image-container {
-    background: var(--bg-accent);
-    border: 2px dashed rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-top: 1rem;
-}
-
-.image-container img {
-    max-width: 100%;
-    max-height: 300px;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-}
-
-.image-container input[type="file"] {
-    color: var(--text-secondary);
-}
-
-/* Button Styles */
 .btn {
     background: var(--gradient);
     color: white;
@@ -215,55 +181,12 @@ textarea {
     justify-content: flex-end;
 }
 
-/* Responsive Styles */
-@media (max-width: 768px) {
-    body { padding: 1rem; }
-    .btn-group { flex-direction: column; }
-}
-
-/* Print Styles */
-@media print {
-    body {
-        background: var(--bg-primary);
-        color: var(--text-primary);
-        padding: 0;
-    }
-
-    .container { 
-        max-width: 100%; 
-    }
-
-    .header {
-        background: var(--bg-secondary);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .header h1 {
-        background: var(--gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 24pt;
-    }
-
-    .question-card {
-        background: var(--bg-secondary);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 1rem;
-        margin-bottom: 2rem;
-        break-inside: avoid;
-        page-break-inside: avoid;
-    }
-
-    .btn-group,
-    input[type="file"] { 
-        display: none !important; 
-    }
-}
-
-/* Animations */
 @keyframes float {
     0%, 100% { transform: translateY(0) rotateX(10deg); }
     50% { transform: translateY(-10px) rotateX(12deg); }
+}
+
+@media (max-width: 768px) {
+    body { padding: 1rem; }
+    .btn-group { flex-direction: column; }
 }
