@@ -13,7 +13,42 @@ function initQuiz() {
     
     loadSavedState();
     renderQuiz();
-    setupAdminPanel();
+    setupTawkTo();
+
+    // Set initial date if not set
+    const dateInput = document.getElementById('date');
+    if (dateInput && !dateInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+    }
+
+    // Add input event listener for group name
+    const groupNameInput = document.getElementById('groupName');
+    if (groupNameInput) {
+        groupNameInput.addEventListener('input', updateTawkToVisitor);
+    }
+}
+
+function setupTawkTo() {
+    // Initialize Tawk.to with visitor name if available
+    if (window.Tawk_API) {
+        const groupName = document.getElementById('groupName')?.value || '';
+        if (groupName) {
+            Tawk_API.visitor = {
+                name: groupName
+            };
+        }
+    }
+}
+
+function updateTawkToVisitor() {
+    // Update Tawk.to visitor name when group name changes
+    if (window.Tawk_API) {
+        const groupName = document.getElementById('groupName')?.value || '';
+        Tawk_API.visitor = {
+            name: groupName
+        };
+    }
 }
 
 function renderQuiz() {
@@ -58,7 +93,7 @@ function createImageUploadSection(questionId) {
     return `
         <div class="image-upload" id="upload-${questionId}">
             <label for="image-${questionId}" class="btn-secondary">
-                Last opp bilde (valgfritt)
+                <i class="fas fa-image"></i> Last opp bilde (valgfritt)
             </label>
             <input 
                 type="file" 
@@ -73,7 +108,7 @@ function createImageUploadSection(questionId) {
                 class="btn-danger btn-remove-image" 
                 onclick="removeImage(${questionId})"
                 style="display: none;">
-                Fjern bilde
+                <i class="fas fa-trash"></i> Fjern bilde
             </button>
         </div>
     `;
@@ -271,7 +306,7 @@ function validateForm(event) {
         }
 
         saveState();
-        showSaveIndicator('Svar lagret');
+        UTILS.notification.show('Svar lagret', 'success');
         return true;
     } catch (error) {
         console.error('Form validation error:', error);
@@ -296,16 +331,6 @@ function showSaveIndicator(message = 'Lagret') {
 function validateAndPrint() {
     if (validateForm()) {
         window.print();
-    }
-}
-
-// Setup admin panel if user is admin
-function setupAdminPanel() {
-    if (AUTH.isAdmin()) {
-        const adminPanel = document.getElementById('adminPanel');
-        if (adminPanel) {
-            adminPanel.style.display = 'block';
-        }
     }
 }
 
