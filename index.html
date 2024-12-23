@@ -12,28 +12,14 @@
     <meta http-equiv='expires' content='0'> 
     <meta http-equiv='pragma' content='no-cache'>
 
-    <title>AoIP Challenge - Mikkelsens Institutt</title>
+    <title>Mikkelsens AoIP Quiz</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="theme-toggle" class="theme-toggle">
-        <i class="fas fa-moon"></i>
-    </div>
-
-    <div id="splash-screen" class="splash-screen">
-        <div class="splash-content">
-            <h1>AoIP Challenge</h1>
-            <p class="splash-subtitle">Utviklet av Mikkelsens Institutt</p>
-            <div class="splash-divider"></div>
-            <p class="splash-description">Besvar spørsmålene grundig og vis dypere forståelse</p>
-            <div class="splash-countdown">Starter om <span id="countdown">4</span> sekunder</div>
-        </div>
-    </div>
-
-    <div id="main-content" class="container" style="display: none;">
+    <div class="container">
         <header class="header">
-            <h1>Gleditsch AoIP Challenge</h1>
-            <p>Besvar spørsmålene grundig og print/lagre som PDF</p>
+            <h1>Mikkelsens AoIP Quiz</h1>
+            <p>Besvar spørsmålene og print/lagre som PDF</p>
         </header>
 
         <form id="quizForm" onsubmit="return validateForm(event)">
@@ -66,16 +52,12 @@
             <div id="questionContainer"></div>
 
             <div class="btn-group">
-                <button type="button" class="btn btn-print" onclick="validateAndPrint()">
-                    <i class="fas fa-print"></i> Print/Lagre som PDF
-                </button>
+                <button type="button" class="btn" onclick="validateAndPrint()">Print/Lagre som PDF</button>
             </div>
         </form>
     </div>
 
     <script src="quiz-config.js"></script>
     <script src="quiz-functions.js"></script>
-    <script src="splash-screen.js"></script>
-    <script src="theme-toggle.js"></script>
 </body>
 </html>
