@@ -16,12 +16,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (countdown <= 0) {
             clearInterval(countdownInterval);
             
+            // Fade out splash screen
             splashScreen.style.opacity = '0';
+            
+            // Show main content after fade
             setTimeout(() => {
                 splashScreen.style.display = 'none';
                 mainContent.style.display = 'block';
                 
-                // Ensure quiz is initialized
+                // Initialize quiz if not already done
                 if (typeof initQuiz === 'function') {
                     initQuiz();
                 } else {
