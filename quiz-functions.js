@@ -1,4 +1,4 @@
-// Input Sanitization
+// Quiz Functions with Debugging
 function sanitizeInput(element) {
     const clean = element.value.replace(/[<>]/g, '');
     if (clean !== element.value) {
@@ -6,16 +6,6 @@ function sanitizeInput(element) {
     }
 }
 
-function escapeHtml(unsafe) {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-// Form Validation
 function validateForm(event) {
     if (event) event.preventDefault();
     
@@ -49,7 +39,7 @@ function createQuestionCard(question, index) {
         <textarea 
             id="answer-${question.id}"
             name="answer-${question.id}"
-            placeholder="Skriv svaret ditt her..."
+            placeholder="${question.placeholder || 'Skriv svaret ditt her...'}"
             maxlength="10000"
         ></textarea>
     `;
@@ -58,16 +48,40 @@ function createQuestionCard(question, index) {
     return card;
 }
 
+// Debug function to log questions
+function logQuestions() {
+    console.log('Questions:', questions);
+    console.log('Number of questions:', questions.length);
+}
+
 // Quiz Initialization
 function initQuiz() {
     const container = document.getElementById('questionContainer');
     
+    // Debugging
+    console.log('Initializing quiz...');
+    logQuestions();
+
+    // Ensure container exists
+    if (!container) {
+        console.error('Question container not found!');
+        return;
+    }
+    
     // Clear any existing questions first
     container.innerHTML = '';
 
+    // Defensive check for questions
+    if (!questions || questions.length === 0) {
+        console.error('No questions found!');
+        return;
+    }
+
     // Create question cards
     questions.forEach((question, index) => {
-        container.appendChild(createQuestionCard(question, index));
+        const questionCard = createQuestionCard(question, index);
+        container.appendChild(questionCard);
+        console.log(`Added question ${index + 1}`);
     });
     
     // Set today's date
@@ -76,8 +90,7 @@ function initQuiz() {
 }
 
 // Initialize quiz when document is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initQuiz);
-} else {
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded');
     initQuiz();
-}
+});
