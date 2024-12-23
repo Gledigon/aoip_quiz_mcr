@@ -7,6 +7,17 @@
     --accent-blue: #3b82f6;
     --accent-purple: #8b5cf6;
     --gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    --error: #ef4444;
+    --success: #22c55e;
+}
+
+/* Light theme variables */
+.light {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #e2e8f0;
+    --bg-accent: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
 }
 
 * {
@@ -22,6 +33,7 @@ body {
     min-height: 100vh;
     line-height: 1.6;
     padding: 2rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -29,6 +41,7 @@ body {
     margin: 0 auto;
 }
 
+/* Theme Toggle */
 .theme-toggle {
     position: fixed;
     top: 20px;
@@ -43,8 +56,14 @@ body {
     align-items: center;
     cursor: pointer;
     z-index: 1000;
+    transition: background-color 0.3s ease;
 }
 
+.theme-toggle:hover {
+    background: var(--accent-blue);
+}
+
+/* Splash Screen */
 .splash-screen {
     position: fixed;
     top: 0;
@@ -57,34 +76,19 @@ body {
     align-items: center;
     z-index: 1000;
     transition: opacity 0.5s ease;
-    background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
-    perspective: 1000px;
 }
 
 .splash-content {
     text-align: center;
     padding: 3rem;
-    background: rgba(30, 41, 59, 0.8); 
+    background: var(--bg-secondary);
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.1);
-    transform-style: preserve-3d;
-    transform: rotateX(10deg);
-    transition: all 0.5s ease;
-    backdrop-filter: blur(10px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
     animation: float 3s ease-in-out infinite;
 }
 
-.splash-content h1 {
-    background: var(--gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 3rem;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
+/* Header */
 .header {
     text-align: center;
     padding: 2rem;
@@ -102,6 +106,7 @@ body {
     margin-bottom: 1rem;
 }
 
+/* Form Elements */
 .group-info {
     background: var(--bg-secondary);
     padding: 2rem;
@@ -131,19 +136,33 @@ body {
     border-radius: 8px;
     color: var(--text-primary);
     font-size: 1rem;
+    transition: border-color 0.3s ease;
 }
 
+.form-group input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
+
+/* Question Cards */
 .question-card {
     background: var(--bg-secondary);
     padding: 1.5rem;
     border-radius: 16px;
     margin-bottom: 2rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .question-card:hover {
     transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.question-text {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--text-primary);
 }
 
 textarea {
@@ -157,8 +176,33 @@ textarea {
     font-size: 1rem;
     margin-bottom: 1rem;
     resize: vertical;
+    transition: border-color 0.3s ease;
 }
 
+textarea:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
+
+/* Image Upload */
+.image-upload {
+    margin-top: 1rem;
+}
+
+.image-preview {
+    margin-top: 1rem;
+    max-width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.image-preview img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Buttons */
 .btn {
     background: var(--gradient);
     color: white;
@@ -172,6 +216,12 @@ textarea {
 
 .btn:hover {
     opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--bg-accent);
+    color: var(--text-primary);
 }
 
 .btn-group {
@@ -181,12 +231,58 @@ textarea {
     justify-content: flex-end;
 }
 
+/* Animations */
 @keyframes float {
     0%, 100% { transform: translateY(0) rotateX(10deg); }
     50% { transform: translateY(-10px) rotateX(12deg); }
 }
 
+/* Print Styles */
+@media print {
+    body {
+        background: white;
+        color: black;
+        padding: 0;
+    }
+
+    .theme-toggle,
+    .btn-group,
+    .image-upload {
+        display: none;
+    }
+
+    .container {
+        max-width: none;
+    }
+
+    .question-card,
+    .group-info {
+        break-inside: avoid;
+        border: 1px solid #ccc;
+        margin: 1rem 0;
+        page-break-inside: avoid;
+    }
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    body { padding: 1rem; }
-    .btn-group { flex-direction: column; }
+    body { 
+        padding: 1rem; 
+    }
+    
+    .btn-group { 
+        flex-direction: column; 
+    }
+    
+    .header h1 {
+        font-size: 2rem;
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
 }
