@@ -1,58 +1,23 @@
 // Admin Panel Functionality
 const ADMIN = {
-    questions: QUESTIONS,
-    
     initialize: function() {
-        if (!this.isAdmin()) return;
-        this.createAdminPanel();
-        this.setupEventListeners();
+        if (AUTH.isAdmin()) {
+            this.showAdminPanel();
+            this.updateQuestionList();
+            this.loadStatistics();
+        }
     },
 
-    isAdmin: function() {
-        return localStorage.getItem('isAdmin') === 'true';
-    },
-
-    createAdminPanel: function() {
-        const adminPanel = document.createElement('div');
-        adminPanel.className = 'admin-panel';
-        adminPanel.innerHTML = `
-            <div class="admin-header">
-                <h2>Administrasjonspanel</h2>
-                <button class="btn" onclick="ADMIN.addQuestion()">Legg til spørsmål</button>
-            </div>
-            <div class="question-list">
-                ${this.renderQuestionList()}
-            </div>
-            <div class="stats-panel">
-                <h3>Statistikk</h3>
-                <div id="statsContent"></div>
-            </div>
-        `;
-        document.querySelector('.container').prepend(adminPanel);
-        this.updateStats();
-    },
-
-    renderQuestionList: function() {
-        return this.questions.map(q => `
-            <div class="admin-question-card" data-id="${q.id}">
-                <div class="question-content">
-                    <p>${q.text}</p>
-                </div>
-                <div class="question-actions">
-                    <button onclick="ADMIN.editQuestion(${q.id})" class="btn-secondary">
-                        Rediger
-                    </button>
-                    <button onclick="ADMIN.deleteQuestion(${q.id})" class="btn-danger">
-                        Slett
-                    </button>
-                </div>
-            </div>
-        `).join('');
+    showAdminPanel: function() {
+        const adminPanel = document.getElementById('adminPanel');
+        if (adminPanel) {
+            adminPanel.style.display = 'block';
+        }
     },
 
     addQuestion: function() {
         const newQuestion = {
-            id: this.questions.length + 1,
+            id: QUESTIONS.length + 1,
             text: '',
             placeholder: '',
             allowImage: true,
@@ -89,15 +54,15 @@ const ADMIN = {
             newQuestion.required = document.getElementById('newQuestionRequired').checked;
             newQuestion.allowImage = document.getElementById('newQuestionAllowImage').checked;
 
-            this.questions.push(newQuestion);
+            QUESTIONS.push(newQuestion);
             this.saveQuestions();
-            this.refreshQuestionList();
+            this.updateQuestionList();
             modal.remove();
         });
     },
 
     editQuestion: function(id) {
-        const question = this.questions.find(q => q.id === id);
+        const question = QUESTIONS.find(q => q.id === id);
         if (!question) return;
 
         const modal = this.createModal('Rediger spørsmål', `
@@ -134,7 +99,7 @@ const ADMIN = {
             question.allowImage = document.getElementById('editQuestionAllowImage').checked;
 
             this.saveQuestions();
-            this.refreshQuestionList();
+            this.updateQuestionList();
             modal.remove();
         });
     },
@@ -142,9 +107,14 @@ const ADMIN = {
     deleteQuestion: function(id) {
         if (!confirm('Er du sikker på at du vil slette dette spørsmålet?')) return;
         
-        this.questions = this.questions.filter(q => q.id !== id);
-        this.saveQuestions();
-        this.refreshQuestionList();
+        const index = QUESTIONS.findIndex(q => q.id === id);
+        if (index !== -1) {
+            QUESTIONS.splice(index, 1);
+            // Oppdater ID-er for gjenværende spørsmål
+            QUESTIONS.forEach((q, i) => q.id = i + 1);
+            this.saveQuestions();
+            this.updateQuestionList();
+        }
     },
 
     createModal: function(title, content) {
@@ -157,7 +127,8 @@ const ADMIN = {
                     ${content}
                     <div class="button-group">
                         <button type="submit" class="btn">Lagre</button>
-                        <button type="button" class="btn-secondary" onclick="this.closest('.admin-modal').remove()">
+                        <button type="button" class="btn-secondary" 
+                                onclick="this.closest('.admin-modal').remove()">
                             Avbryt
                         </button>
                     </div>
@@ -169,49 +140,98 @@ const ADMIN = {
     },
 
     saveQuestions: function() {
-        localStorage.setItem('quizQuestions', JSON.stringify(this.questions));
-        location.reload(); // Refresh for å vise oppdaterte spørsmål
+        localStorage.setItem('quizQuestions', JSON.stringify(QUESTIONS));
+        location.reload();
     },
 
-    refreshQuestionList: function() {
-        const list = document.querySelector('.question-list');
-        if (list) {
-            list.innerHTML = this.renderQuestionList();
+    updateQuestionList: function() {
+        const list = document.getElementById('questionList');
+        if (!list) return;
+
+        list.innerHTML = QUESTIONS.map(q => `
+            <div class="admin-question-card" data-id="${q.id}">
+                <div class="question-content">
+                    <p>${q.text}</p>
+                </div>
+                <div class="question-actions">
+                    <button onclick="ADMIN.editQuestion(${q.id})" class="btn-secondary">
+                        Rediger
+                    </button>
+                    <button onclick="ADMIN.deleteQuestion(${q.id})" class="btn-danger">
+                        Slett
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    toggleStatistics: function() {
+        const statsPanel = document.getElementById('statisticsPanel');
+        if (statsPanel) {
+            if (statsPanel.style.display === 'none') {
+                statsPanel.style.display = 'block';
+                this.loadStatistics();
+            } else {
+                statsPanel.style.display = 'none';
+            }
         }
     },
 
-    updateStats: function() {
+    loadStatistics: function() {
         const statsContent = document.getElementById('statsContent');
         if (!statsContent) return;
 
-        // Hent lagrede svar
-        const savedAnswers = Object.keys(localStorage)
-            .filter(key => key.startsWith('aoip_quiz_'))
-            .map(key => JSON.parse(localStorage.getItem(key)));
-
+        // Samle statistikk
         const stats = {
-            totalResponses: savedAnswers.length,
-            averageLength: Math.round(
-                savedAnswers.reduce((acc, curr) => acc + curr.answer.length, 0) / 
-                savedAnswers.length || 0
-            ),
-            completionRate: Math.round(
-                (savedAnswers.length / (this.questions.length || 1)) * 100
-            )
+            totalAnswers: 0,
+            averageLength: 0,
+            completionRate: 0
         };
 
+        // Hent alle lagrede svar
+        const savedAnswers = Object.keys(localStorage)
+            .filter(key => key.startsWith('quizState'))
+            .map(key => {
+                try {
+                    return JSON.parse(localStorage.getItem(key));
+                } catch (e) {
+                    return null;
+                }
+            })
+            .filter(data => data !== null);
+
+        if (savedAnswers.length > 0) {
+            stats.totalAnswers = savedAnswers.length;
+            
+            // Beregn gjennomsnittlig svarlengde
+            const totalLength = savedAnswers.reduce((acc, curr) => {
+                return acc + Object.values(curr.answers).reduce((sum, answer) => 
+                    sum + (answer ? answer.length : 0), 0);
+            }, 0);
+            
+            stats.averageLength = Math.round(totalLength / stats.totalAnswers);
+            
+            // Beregn fullføringsrate
+            const completedAnswers = savedAnswers.filter(data => 
+                Object.keys(data.answers).length === QUESTIONS.length
+            ).length;
+            
+            stats.completionRate = Math.round((completedAnswers / stats.totalAnswers) * 100);
+        }
+
+        // Vis statistikken
         statsContent.innerHTML = `
             <div class="stat-item">
-                <span class="stat-label">Totale svar:</span>
-                <span class="stat-value">${stats.totalResponses}</span>
+                <span>Totale besvarelser:</span>
+                <span>${stats.totalAnswers}</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Gjennomsnittlig svarlengde:</span>
-                <span class="stat-value">${stats.averageLength} tegn</span>
+                <span>Gjennomsnittlig svarlengde:</span>
+                <span>${stats.averageLength} tegn</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Fullføringsrate:</span>
-                <span class="stat-value">${stats.completionRate}%</span>
+                <span>Fullføringsrate:</span>
+                <span>${stats.completionRate}%</span>
             </div>
         `;
     }
