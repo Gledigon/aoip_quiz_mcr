@@ -28,19 +28,9 @@
 
     <div id="main-content" class="container" style="display: none;">
         <header class="header">
-            <div class="header-content">
-                <h1>Gleditsch AoIP Challenge</h1>
-                <div class="timer-section">
-                    <i class="fas fa-clock"></i>
-                    <span id="quiz-timer">2:00:00</span>
-                </div>
-            </div>
+            <h1>Gleditsch AoIP Challenge</h1>
             <p>Besvar spørsmålene grundig og print/lagre som PDF</p>
         </header>
-
-        <div class="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
-        </div>
 
         <form id="quizForm" onsubmit="return validateForm(event)">
             <div class="group-info">
@@ -72,31 +62,11 @@
             <div id="questionContainer"></div>
 
             <div class="btn-group">
-                <button type="button" class="btn btn-save" onclick="saveProgress()">
-                    <i class="fas fa-save"></i> Lagre utkast
-                </button>
-                <button type="button" class="btn btn-submit" onclick="validateAndSubmit()">
-                    <i class="fas fa-paper-plane"></i> Send inn besvarelse
-                </button>
                 <button type="button" class="btn btn-print" onclick="validateAndPrint()">
                     <i class="fas fa-print"></i> Print/Lagre som PDF
                 </button>
             </div>
         </form>
-
-        <div id="help-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-modal">&times;</span>
-                <h2>Quiz Instruksjoner</h2>
-                <p>Velkommen til AoIP Challenge. Her er noen viktige instruksjoner:</p>
-                <ul>
-                    <li>Du har 2 timer til å fullføre quizen</li>
-                    <li>Svarene dine lagres automatisk hvert 30. sekund</li>
-                    <li>Last opp relevante bilder for å støtte dine svar</li>
-                    <li>Bruk god tid og vis grundig forståelse</li>
-                </ul>
-            </div>
-        </div>
     </div>
 
     <script src="quiz-config.js"></script>
