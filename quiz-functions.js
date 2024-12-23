@@ -1,5 +1,5 @@
-// Hardcoded Questions
-var questions = [
+// Questions
+const questions = [
     {
         id: 1,
         text: "Hvilke porter må være åpne i brannmuren for å motta lyd fra en Tieline Via enhet?",
@@ -57,22 +57,26 @@ function initQuiz() {
         return;
     }
 
-    // Clear any existing content
-    container.innerHTML = '';
+    // Ensure container is visible
+    container.style.display = 'block';
+    container.innerHTML = ''; // Clear previous content
 
     // Create question cards
     questions.forEach((question, index) => {
         const card = document.createElement('div');
         card.className = 'question-card';
+        card.style.backgroundColor = '#1e293b';
+        card.style.color = 'white';
+        card.style.padding = '15px';
+        card.style.marginBottom = '15px';
+        card.style.borderRadius = '8px';
         card.innerHTML = `
-            <div class="question-header">
-                <div class="question-number">${index + 1}</div>
-                <div class="question-text">${question.text}</div>
-            </div>
+            <h3 style="color: white; margin-bottom: 10px;">Spørsmål ${index + 1}</h3>
+            <p style="margin-bottom: 10px;">${question.text}</p>
             <textarea 
                 id="answer-${question.id}" 
                 placeholder="${question.placeholder}"
-                style="width: 100%; height: 200px;"
+                style="width: 100%; height: 200px; background-color: #2d3748; color: white; border: none; padding: 10px; border-radius: 8px;"
             ></textarea>
         `;
         container.appendChild(card);
@@ -81,6 +85,13 @@ function initQuiz() {
     console.log('Quiz initialized with ' + questions.length + ' questions');
 }
 
-// Multiple initialization methods
+// Multiple initialization triggers
 document.addEventListener('DOMContentLoaded', initQuiz);
 window.addEventListener('load', initQuiz);
+
+// Ensure initialization after splash screen
+function forceQuizInit() {
+    initQuiz();
+    console.log('Quiz forcibly initialized');
+}
+setTimeout(forceQuizInit, 5000);
