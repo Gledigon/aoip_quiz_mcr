@@ -6,9 +6,8 @@ const AUTH = {
     initialize: function() {
         if (!this.isAuthenticated()) {
             this.showLoginModal();
-        } else {
-            this.setupAdminCheck();
         }
+        this.setupAdminCheck();
     },
 
     isAuthenticated: function() {
@@ -44,11 +43,13 @@ const AUTH = {
 
         // Focus on password input
         setTimeout(() => {
-            document.getElementById('quizPassword').focus();
+            document.getElementById('quizPassword')?.focus();
         }, 100);
     },
 
     showAdminLogin: function() {
+        if (this.isAdmin()) return;
+        
         const modal = document.createElement('div');
         modal.className = 'auth-modal';
         modal.innerHTML = `
@@ -78,42 +79,64 @@ const AUTH = {
 
         // Focus on admin password input
         setTimeout(() => {
-            document.getElementById('adminPassword').focus();
+            document.getElementById('adminPassword')?.focus();
         }, 100);
     },
 
     validateQuizLogin: function(event) {
         event.preventDefault();
-        const password = document.getElementById('quizPassword').value;
+        const password = document.getElementById('quizPassword')?.value;
         
         if (password === this.QUIZ_PASSWORD) {
-            localStorage.setItem('quizAuth', 'true');
-            document.querySelector('.auth-modal').remove();
-            location.reload();
+            try {
+                localStorage.setItem('quizAuth', 'true');
+                const modal = document.querySelector('.auth-modal');
+                if (modal) modal.remove();
+                location.reload();
+            } catch (error) {
+                console.error('Login error:', error);
+                this.showNotification('Kunne ikke logge inn', 'error');
+            }
         } else {
             const errorDiv = document.getElementById('loginError');
-            errorDiv.textContent = 'Feil passord';
-            errorDiv.style.display = 'block';
-            document.getElementById('quizPassword').value = '';
-            document.getElementById('quizPassword').focus();
+            if (errorDiv) {
+                errorDiv.textContent = 'Feil passord';
+                errorDiv.style.display = 'block';
+            }
+            const passwordInput = document.getElementById('quizPassword');
+            if (passwordInput) {
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
         }
         return false;
     },
 
     validateAdminLogin: function(event) {
         event.preventDefault();
-        const password = document.getElementById('adminPassword').value;
+        const password = document.getElementById('adminPassword')?.value;
         
         if (password === this.ADMIN_PASSWORD) {
-            localStorage.setItem('isAdmin', 'true');
-            document.querySelector('.auth-modal').remove();
-            location.reload();
+            try {
+                localStorage.setItem('isAdmin', 'true');
+                const modal = document.querySelector('.auth-modal');
+                if (modal) modal.remove();
+                location.reload();
+            } catch (error) {
+                console.error('Admin login error:', error);
+                this.showNotification('Kunne ikke logge inn som admin', 'error');
+            }
         } else {
             const errorDiv = document.getElementById('adminLoginError');
-            errorDiv.textContent = 'Feil admin passord';
-            errorDiv.style.display = 'block';
-            document.getElementById('adminPassword').value = '';
-            document.getElementById('adminPassword').focus();
+            if (errorDiv) {
+                errorDiv.textContent = 'Feil admin passord';
+                errorDiv.style.display = 'block';
+            }
+            const passwordInput = document.getElementById('adminPassword');
+            if (passwordInput) {
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
         }
         return false;
     },
@@ -139,14 +162,20 @@ const AUTH = {
     },
 
     closeAdminLogin: function() {
-        document.querySelector('.auth-modal').remove();
+        const modal = document.querySelector('.auth-modal');
+        if (modal) modal.remove();
     },
 
     logout: function() {
         if (confirm('Er du sikker på at du vil logge ut?')) {
-            localStorage.removeItem('quizAuth');
-            localStorage.removeItem('isAdmin');
-            location.reload();
+            try {
+                localStorage.removeItem('quizAuth');
+                localStorage.removeItem('isAdmin');
+                location.reload();
+            } catch (error) {
+                console.error('Logout error:', error);
+                this.showNotification('Kunne ikke logge ut', 'error');
+            }
         }
     },
 
