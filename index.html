@@ -13,7 +13,10 @@
     <meta http-equiv='pragma' content='no-cache'>
 
     <title>Mikkelsens AoIP Quiz</title>
+    <!-- Load main CSS -->
     <link rel="stylesheet" href="styles.css">
+    <!-- Load Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <!-- Logout Button -->
@@ -26,14 +29,6 @@
         <i class="fas fa-moon"></i>
     </div>
 
-    <!-- Splash Screen -->
-    <div id="splash-screen" class="splash-screen">
-        <div class="splash-content">
-            <h1>AoIP Quiz</h1>
-            <p>Laster inn... <span id="countdown">4</span></p>
-        </div>
-    </div>
-
     <!-- Main Content -->
     <div id="main-content" class="container">
         <!-- Admin Panel -->
@@ -41,8 +36,12 @@
             <div class="admin-header">
                 <h2>Administrasjonspanel</h2>
                 <div class="admin-controls">
-                    <button class="btn" onclick="ADMIN.addQuestion()">Legg til spørsmål</button>
-                    <button class="btn btn-secondary" onclick="ADMIN.toggleStatistics()">Vis statistikk</button>
+                    <button class="btn" onclick="ADMIN.addQuestion()">
+                        <i class="fas fa-plus"></i> Legg til spørsmål
+                    </button>
+                    <button class="btn btn-secondary" onclick="ADMIN.toggleStatistics()">
+                        <i class="fas fa-chart-bar"></i> Vis statistikk
+                    </button>
                 </div>
             </div>
             <div id="questionList" class="question-list"></div>
@@ -60,6 +59,7 @@
 
         <!-- Quiz Form -->
         <form id="quizForm" onsubmit="return validateForm(event)">
+            <!-- Group Info Section -->
             <div class="group-info">
                 <div class="form-group">
                     <label for="groupName">Gruppenavn</label>
@@ -71,7 +71,7 @@
                         pattern="[A-Za-zÆØÅæøå0-9\s\-_]{2,50}"
                         placeholder="Skriv inn navnet på gruppen"
                         maxlength="50"
-                        onkeyup="sanitizeInput(this)"
+                        onkeyup="UTILS.string.sanitize(this.value)"
                     >
                 </div>
                 <div class="form-group">
@@ -86,20 +86,50 @@
                 </div>
             </div>
 
-            <div id="questionContainer"></div>
+            <!-- Questions Container -->
+            <div id="questionContainer" class="question-container"></div>
 
+            <!-- Form Buttons -->
             <div class="btn-group">
-                <button type="submit" class="btn">Lagre svar</button>
-                <button type="button" class="btn btn-secondary" onclick="validateAndPrint()">Print/Lagre som PDF</button>
+                <button type="submit" class="btn">
+                    <i class="fas fa-save"></i> Lagre svar
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="validateAndPrint()">
+                    <i class="fas fa-print"></i> Print/Lagre som PDF
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="EXPORT.shareViaEmail()">
+                    <i class="fas fa-envelope"></i> Del via e-post
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="EXPORT.generateShareableLink()">
+                    <i class="fas fa-link"></i> Generer delbar lenke
+                </button>
             </div>
         </form>
+
+        <!-- Loading Indicator Template -->
+        <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+            <div class="loader-content">
+                <div class="spinner"></div>
+                <p id="loadingMessage">Laster...</p>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
-    <script src="auth.js"></script>
+    <!-- Load Utilities First -->
+    <script src="utils.js"></script>
+    
+    <!-- Load Core Functionality -->
     <script src="quiz-config.js"></script>
+    <script src="auth.js"></script>
     <script src="quiz-functions.js"></script>
-    <script src="admin-panel.js"></script>
+    
+    <!-- Load Additional Features -->
     <script src="theme-toggle.js"></script>
+    <script src="admin-panel.js"></script>
+    <script src="export-functions.js"></script>
+    
+    <!-- HTML2PDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </body>
 </html>
