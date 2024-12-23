@@ -1,31 +1,140 @@
-// Questions
-const questions = [
-    {
-        id: 1,
-        text: "Hvilke porter må være åpne i brannmuren for å motta lyd fra en Tieline Via enhet?",
-        placeholder: "Beskriv nødvendige porter og protokoller..."
-    },
-    {
-        id: 2,
-        text: "Hvordan verifiserer du at du mottar lyd fra en Prodys Quantum sender?",
-        placeholder: "Forklar fremgangsmåten for lydverifisering..."
-    },
-    {
-        id: 3,
-        text: "Hva gjør du hvis lydstrømmen fra en Tieline Via plutselig forsvinner?",
-        placeholder: "Beskriv feilsøkingstrinn..."
-    }
-];
+// Quiz state management
+let quizState = {
+    answers: {},
+    images: {}
+};
 
-// Sanitize Input
-function sanitizeInput(element) {
-    const clean = element.value.replace(/[<>]/g, '');
-    if (clean !== element.value) {
-        element.value = clean;
+// Initialize Quiz
+function initQuiz() {
+    loadSavedState();
+    renderQuiz();
+    setupAutosave();
+}
+
+function renderQuiz() {
+    const container = document.getElementById('questionContainer');
+    if (!container) {
+        console.error('FEIL: Kan ikke finne spørsmålsbeholderen!');
+        return;
+    }
+
+    container.innerHTML = '';
+
+    QUESTIONS.forEach((question, index) => {
+        const card = createQuestionCard(question, index);
+        container.appendChild(card);
+    });
+
+    restoreSavedAnswers();
+}
+
+function createQuestionCard(question, index) {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    
+    const content = `
+        <h3>Spørsmål ${index + 1}</h3>
+        <p class="question-text">${question.text}</p>
+        <textarea 
+            id="answer-${question.id}" 
+            placeholder="${question.placeholder}"
+            onchange="saveAnswer(${question.id}, this.value)"
+            required="${question.required}"
+        >${quizState.answers[question.id] || ''}</textarea>
+        ${question.allowImage ? createImageUploadSection(question.id) : ''}
+    `;
+    
+    card.innerHTML = content;
+    return card;
+}
+
+function createImageUploadSection(questionId) {
+    return `
+        <div class="image-upload">
+            <label for="image-${questionId}" class="btn-secondary">
+                Last opp bilde (valgfritt)
+            </label>
+            <input 
+                type="file" 
+                id="image-${questionId}"
+                accept="image/*"
+                onchange="handleImageUpload(${questionId}, this)"
+                style="display: none"
+            >
+            <div id="image-preview-${questionId}" class="image-preview"></div>
+        </div>
+    `;
+}
+
+function handleImageUpload(questionId, input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    if (!CONFIG.allowedImageTypes.includes(file.type)) {
+        alert('Ugyldig filtype. Kun JPEG, PNG og GIF er tillatt.');
+        input.value = '';
+        return;
+    }
+
+    if (file.size > CONFIG.maxFileSize) {
+        alert('Filen er for stor. Maksimal størrelse er 5MB.');
+        input.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById(`image-preview-${questionId}`);
+        preview.innerHTML = `<img src="${e.target.result}" alt="Forhåndsvisning">`;
+        quizState.images[questionId] = e.target.result;
+        saveState();
+    };
+    reader.readAsDataURL(file);
+}
+
+// Save and Load Functions
+function saveAnswer(questionId, value) {
+    quizState.answers[questionId] = value;
+    saveState();
+}
+
+function saveState() {
+    try {
+        localStorage.setItem('quizState', JSON.stringify(quizState));
+        localStorage.setItem('lastSaved', new Date().toISOString());
+    } catch (error) {
+        console.error('Feil ved lagring av tilstand:', error);
     }
 }
 
-// Validate Form
+function loadSavedState() {
+    try {
+        const saved = localStorage.getItem('quizState');
+        if (saved) {
+            quizState = JSON.parse(saved);
+        }
+    } catch (error) {
+        console.error('Feil ved lasting av lagret tilstand:', error);
+    }
+}
+
+function restoreSavedAnswers() {
+    Object.entries(quizState.answers).forEach(([questionId, answer]) => {
+        const textarea = document.getElementById(`answer-${questionId}`);
+        if (textarea) {
+            textarea.value = answer;
+        }
+    });
+
+    Object.entries(quizState.images).forEach(([questionId, imageData]) => {
+        const preview = document.getElementById(`image-preview-${questionId}`);
+        if (preview) {
+            preview.innerHTML = `<img src="${imageData}" alt="Forhåndsvisning">`;
+        }
+    });
+}
+
+// Form Validation and Submission
 function validateForm(event) {
     if (event) event.preventDefault();
     
@@ -37,7 +146,24 @@ function validateForm(event) {
         return false;
     }
 
+    const unansweredQuestions = QUESTIONS
+        .filter(q => q.required && !quizState.answers[q.id])
+        .map(q => q.id);
+
+    if (unansweredQuestions.length > 0) {
+        alert(`Vennligst svar på alle påkrevde spørsmål (${unansweredQuestions.join(', ')})`);
+        return false;
+    }
+
+    saveState();
     return true;
+}
+
+// Autosave Setup
+function setupAutosave() {
+    setInterval(() => {
+        saveState();
+    }, CONFIG.autosaveInterval);
 }
 
 // Print Function
@@ -47,51 +173,14 @@ function validateAndPrint() {
     }
 }
 
-// Initialize Quiz
-function initQuiz() {
-    console.log('Initiating quiz...');
-    const container = document.getElementById('questionContainer');
-    
-    if (!container) {
-        console.error('FEIL: Kan ikke finne spørsmålsbeholderen!');
-        return;
+// Cleanup Function
+function resetQuiz() {
+    if (confirm('Er du sikker på at du vil tilbakestille alle svar?')) {
+        localStorage.removeItem('quizState');
+        quizState = { answers: {}, images: {} };
+        renderQuiz();
     }
-
-    // Ensure container is visible
-    container.style.display = 'block';
-    container.innerHTML = ''; // Clear previous content
-
-    // Create question cards
-    questions.forEach((question, index) => {
-        const card = document.createElement('div');
-        card.className = 'question-card';
-        card.style.backgroundColor = '#1e293b';
-        card.style.color = 'white';
-        card.style.padding = '15px';
-        card.style.marginBottom = '15px';
-        card.style.borderRadius = '8px';
-        card.innerHTML = `
-            <h3 style="color: white; margin-bottom: 10px;">Spørsmål ${index + 1}</h3>
-            <p style="margin-bottom: 10px;">${question.text}</p>
-            <textarea 
-                id="answer-${question.id}" 
-                placeholder="${question.placeholder}"
-                style="width: 100%; height: 200px; background-color: #2d3748; color: white; border: none; padding: 10px; border-radius: 8px;"
-            ></textarea>
-        `;
-        container.appendChild(card);
-    });
-
-    console.log('Quiz initialized with ' + questions.length + ' questions');
 }
 
-// Multiple initialization triggers
+// Initialize on load
 document.addEventListener('DOMContentLoaded', initQuiz);
-window.addEventListener('load', initQuiz);
-
-// Ensure initialization after splash screen
-function forceQuizInit() {
-    initQuiz();
-    console.log('Quiz forcibly initialized');
-}
-setTimeout(forceQuizInit, 5000);
