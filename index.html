@@ -15,6 +15,46 @@
     <title>MCR AoIP Challenge</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .image-upload-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .image-preview-item {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border: 2px dashed var(--corporate-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .image-preview-item img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            cursor: move;
+        }
+        .image-preview-item .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+    </style>
 </head>
 <body>
     <!-- Logout Button -->
@@ -65,18 +105,19 @@
 
             <!-- Image Upload Section -->
             <div class="form-group image-upload">
-                <label for="imageUpload">
-                    <i class="fas fa-cloud-upload-alt"></i> Last opp bilde
+                <label for="imageUpload" class="btn btn-secondary">
+                    <i class="fas fa-cloud-upload-alt"></i> Last opp bilder
                     <input 
                         type="file" 
                         id="imageUpload" 
                         name="imageUpload" 
                         accept="image/*" 
+                        multiple
                         style="display: none;"
                         onchange="UPLOAD.handleImageUpload(event)"
                     >
                 </label>
-                <div id="imagePreview" class="image-preview"></div>
+                <div id="imagePreviewContainer" class="image-upload-container"></div>
             </div>
 
             <!-- Questions Container -->
@@ -114,14 +155,11 @@
     <script>
     // Image Resize Utility
     const ImageResize = {
-        // Maximum image dimensions
         MAX_WIDTH: 1024,
         MAX_HEIGHT: 1024,
         MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
 
-        // Resize image to fit within max dimensions while maintaining aspect ratio
         resizeImage: async (file) => {
-            // Check file size
             if (file.size > ImageResize.MAX_FILE_SIZE) {
                 alert('Bildet er for stort. Maks størrelse er 5MB.');
                 return null;
@@ -132,11 +170,9 @@
                 reader.onload = (event) => {
                     const img = new Image();
                     img.onload = () => {
-                        // Calculate new dimensions
                         let width = img.width;
                         let height = img.height;
 
-                        // Resize if needed
                         if (width > ImageResize.MAX_WIDTH || height > ImageResize.MAX_HEIGHT) {
                             const ratio = Math.min(
                                 ImageResize.MAX_WIDTH / width,
@@ -146,18 +182,14 @@
                             height = Math.round(height * ratio);
                         }
 
-                        // Create canvas for resizing
                         const canvas = document.createElement('canvas');
                         canvas.width = width;
                         canvas.height = height;
 
-                        // Draw resized image
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // Convert to blob
                         canvas.toBlob((blob) => {
-                            // Create new File object
                             const resizedFile = new File([blob], file.name, {
                                 type: file.type,
                                 lastModified: Date.now()
@@ -175,54 +207,85 @@
 
     // Upload Handling
     const UPLOAD = {
+        uploadedFiles: [],
+
         handleImageUpload: async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
+            const files = Array.from(event.target.files);
+            const previewContainer = document.getElementById('imagePreviewContainer');
 
-            try {
-                // Resize image
-                const resizedFile = await ImageResize.resizeImage(file);
-                if (!resizedFile) return;
+            for (const file of files) {
+                try {
+                    const resizedFile = await ImageResize.resizeImage(file);
+                    if (!resizedFile) continue;
 
-                // Create preview
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const previewContainer = document.getElementById('imagePreview');
-                    previewContainer.innerHTML = `
-                        <img src="${e.target.result}" alt="Opplastet bilde" style="max-width: 100%; max-height: 300px;">
-                        <button type="button" onclick="UPLOAD.removeImage()" class="btn btn-secondary" style="margin-top: 10px;">
-                            <i class="fas fa-trash"></i> Fjern bilde
-                        </button>
-                    `;
-                };
-                reader.readAsDataURL(resizedFile);
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const previewItem = document.createElement('div');
+                        previewItem.className = 'image-preview-item';
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Opplastet bilde';
+                        
+                        const removeBtn = document.createElement('button');
+                        removeBtn.innerHTML = '&times;';
+                        removeBtn.className = 'remove-image';
+                        removeBtn.onclick = () => UPLOAD.removeImage(previewItem, resizedFile);
 
-                // Store resized file for form submission
-                UPLOAD.uploadedFile = resizedFile;
-            } catch (error) {
-                console.error('Feil ved bildeopplasting:', error);
-                alert('Det oppstod en feil ved bildeopplasting.');
+                        previewItem.appendChild(removeBtn);
+                        previewItem.appendChild(img);
+                        previewContainer.appendChild(previewItem);
+
+                        // Make image draggable for resizing
+                        UPLOAD.makeDraggableResize(img);
+
+                        // Store file
+                        UPLOAD.uploadedFiles.push(resizedFile);
+                    };
+                    reader.readAsDataURL(resizedFile);
+                } catch (error) {
+                    console.error('Feil ved bildeopplasting:', error);
+                    alert('Det oppstod en feil ved bildeopplasting.');
+                }
+            }
+
+            // Reset file input
+            event.target.value = '';
+        },
+
+        removeImage: (previewElement, file) => {
+            previewElement.remove();
+            // Remove from uploaded files
+            const index = UPLOAD.uploadedFiles.indexOf(file);
+            if (index > -1) {
+                UPLOAD.uploadedFiles.splice(index, 1);
             }
         },
 
-        removeImage: () => {
-            const fileInput = document.getElementById('imageUpload');
-            const previewContainer = document.getElementById('imagePreview');
-            
-            // Clear file input
-            fileInput.value = '';
-            
-            // Clear preview
-            previewContainer.innerHTML = '';
-            
-            // Remove stored file
-            UPLOAD.uploadedFile = null;
+        makeDraggableResize: (img) => {
+            let isDragging = false;
+            let startX, startWidth;
+
+            img.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                startWidth = img.width;
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+
+                const deltaX = e.clientX - startX;
+                const newWidth = startWidth + deltaX;
+                img.style.width = `${Math.max(50, Math.min(newWidth, 500))}px`;
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
         },
 
-        // Method to get uploaded file (can be used in form submission)
-        getUploadedFile: () => {
-            return UPLOAD.uploadedFile;
-        }
+        getUploadedFiles: () => UPLOAD.uploadedFiles
     };
     </script>
 
@@ -233,31 +296,28 @@
         isLoaded: false,
 
         start: function() {
-            if (!this.isLoaded) {
-                this.loadTawkTo();
-            } else {
-                // Ensure Tawk_API exists before calling maximize
-                if (window.Tawk_API && typeof Tawk_API.maximize === 'function') {
+            // Ensure Tawk.to is loaded and maximized
+            if (window.Tawk_API) {
+                if (typeof Tawk_API.maximize === 'function') {
                     Tawk_API.maximize();
                 }
+                return;
             }
+
+            // Load Tawk.to if not already loaded
+            this.loadTawkTo();
         },
 
         loadTawkTo: function() {
-            // Ensure we don't load multiple times
-            if (this.isLoaded) return;
-
-            // Tawk_API configuration
             window.Tawk_API = window.Tawk_API || {};
+            
+            // Maximize chat on load
             window.Tawk_API.onLoad = () => {
-                this.isLoaded = true;
-                // Attempt to maximize chat widget
                 if (typeof Tawk_API.maximize === 'function') {
                     Tawk_API.maximize();
                 }
             };
 
-            // Create and insert script element
             const script = document.createElement('script');
             script.type = 'text/javascript';
             script.async = true;
@@ -265,13 +325,12 @@
             script.charset = 'UTF-8';
             script.crossOrigin = 'anonymous';
 
-            // Insert script into document
             const firstScript = document.getElementsByTagName('script')[0];
             firstScript.parentNode.insertBefore(script, firstScript);
         }
     };
 
-    // Automatically start chat when page loads
+    // Automatically try to start chat on page load
     document.addEventListener('DOMContentLoaded', () => {
         const startChatBtn = document.getElementById('startChat');
         if (startChatBtn) {
