@@ -5,132 +5,141 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
-        script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://*.tawk.to https://va.tawk.to;
-        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://*.tawk.to;
-        img-src 'self' data: blob: https://*.tawk.to;
-        font-src 'self' https://cdnjs.cloudflare.com https://*.tawk.to;
-        connect-src 'self' https://*.tawk.to wss://*.tawk.to;
-        frame-src https://*.tawk.to;
-        media-src https://*.tawk.to;
-        worker-src 'self' blob:;
-        child-src 'self' blob:;
-        base-uri 'self';
-        form-action 'self';
-        object-src 'none';
-        frame-ancestors 'none';
-        upgrade-insecure-requests;
-    ">
+        script-src 'self' 'nonce-randomQuizNonce2024' https://cdnjs.cloudflare.com https://*.tawk.to https://va.tawk.to;
+        style-src 'self' 'nonce-randomQuizNonce2024' https://cdnjs.cloudflare.com https://*.tawk.to;
+        img-src 'self' data: blob: https://*.tawk.to;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="no-referrer">
-    
-    <meta http-equiv='cache-control' content='no-cache, no-store, must-revalidate'> 
-    <meta http-equiv='expires' content='0'> 
-    <meta http-equiv='pragma' content='no-cache'>
+Copy<meta http-equiv='cache-control' content='no-cache, no-store, must-revalidate'> 
+<meta http-equiv='expires' content='0'> 
+<meta http-equiv='pragma' content='no-cache'>
 
-    <title>Mcr AoIP Challenge</title>
-    <!-- Load main CSS -->
-    <link rel="stylesheet" href="styles.css">
-    <!-- Load Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<title>Mikkelsens AoIP Quiz</title>
+<!-- Load main CSS -->
+<link rel="stylesheet" href="styles.css">
+<!-- Load Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
+      integrity="sha512-Iko1VXD8lNMuiXlqhIkKfNqy9pUI9qYUyNW6mOCj/5FbTvg9zP+5mhykLgbxPV/7KTY/zInqtRnkkh7U8VlSng==" 
+      crossorigin="anonymous" referrerpolicy="no-referrer">
 </head>
 <body>
     <!-- Logout Button -->
-    <button onclick="AUTH.logout()" class="logout-btn">
+    <button id="logout-btn" class="logout-btn">
         <i class="fas fa-sign-out-alt"></i> Logg ut
     </button>
+Copy<!-- Theme Toggle -->
+<div id="theme-toggle" class="theme-toggle" title="Bytt tema">
+    <i class="fas fa-moon"></i>
+</div>
 
-    <!-- Theme Toggle -->
-    <div id="theme-toggle" class="theme-toggle" title="Bytt tema">
-        <i class="fas fa-moon"></i>
-    </div>
+<!-- Main Content -->
+<div id="main-content" class="container">
+    <!-- Main Header -->
+    <header class="header">
+        <h1>Mikkelsens AoIP Quiz</h1>
+        <p>Besvar spørsmålene og lagre/print som PDF</p>
+    </header>
 
-    <!-- Main Content -->
-    <div id="main-content" class="container">
-        <!-- Main Header -->
-        <header class="header">
-            <h1>Mcr AoIP Challenge </h1>
-            <p>Besvar spørsmålene og lagre/print som PDF</p>
-        </header>
-
-        <!-- Quiz Form -->
-        <form id="quizForm" onsubmit="return validateForm(event)">
-            <!-- Group Info Section -->
-            <div class="group-info">
-                <div class="form-group">
-                    <label for="groupName">Gruppenavn</label>
-                    <input 
-                        type="text" 
-                        id="groupName" 
-                        name="groupName"
-                        required 
-                        pattern="[A-Za-zÆØÅæøå0-9\s\-_]{2,50}"
-                        placeholder="Skriv inn navnet på gruppen"
-                        maxlength="50"
-                        onkeyup="UTILS.string.sanitize(this.value)"
-                    >
-                </div>
-                <div class="form-group">
-                    <label for="date">Dato</label>
-                    <input 
-                        type="date" 
-                        id="date" 
-                        name="date"
-                        required
-                        min="2024-01-01"
-                    >
-                </div>
+    <!-- Quiz Form -->
+    <form id="quizForm">
+        <!-- Group Info Section -->
+        <div class="group-info">
+            <div class="form-group">
+                <label for="groupName">Gruppenavn</label>
+                <input 
+                    type="text" 
+                    id="groupName" 
+                    name="groupName"
+                    required 
+                    pattern="[A-Za-zÆØÅæøå0-9\s\-_]{2,50}"
+                    placeholder="Skriv inn navnet på gruppen"
+                    maxlength="50"
+                >
             </div>
-
-            <!-- Questions Container -->
-            <div id="questionContainer" class="question-container"></div>
-
-            <!-- Form Buttons -->
-            <div class="btn-group">
-                <button type="submit" class="btn">
-                    <i class="fas fa-save"></i> Lagre svar
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="validateAndPrint()">
-                    <i class="fas fa-print"></i> Print/Lagre som PDF
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="EXPORT.shareViaEmail()">
-                    <i class="fas fa-envelope"></i> Del via e-post
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="EXPORT.generateShareableLink()">
-                    <i class="fas fa-link"></i> Generer delbar lenke
-                </button>
+            <div class="form-group">
+                <label for="date">Dato</label>
+                <input 
+                    type="date" 
+                    id="date" 
+                    name="date"
+                    required
+                    min="2024-01-01"
+                >
             </div>
-        </form>
-    </div>
+        </div>
 
-    <!-- Scripts -->
-    <!-- Load Utilities First -->
-    <script src="utils.js"></script>
-    
-    <!-- Load Core Functionality -->
-    <script src="quiz-config.js"></script>
-    <script src="auth.js"></script>
-    <script src="quiz-functions.js"></script>
-    
-    <!-- Load Additional Features -->
-    <script src="theme-toggle.js"></script>
-    <script src="export-functions.js"></script>
-    
-    <!-- HTML2PDF for PDF Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+        <!-- Questions Container -->
+        <div id="questionContainer" class="question-container"></div>
 
-    <!--Start of Tawk.to Script-->
-    <script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-    (function(){
-        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-        s1.async=true;
-        s1.src='https://embed.tawk.to/6769ef41af5bfec1dbe0cf3e/1ifqst6ms';
-        s1.charset='UTF-8';
-        s1.setAttribute('crossorigin','*');
-        s0.parentNode.insertBefore(s1,s0);
-    })();
-    </script>
-    <!--End of Tawk.to Script-->
+        <!-- Form Buttons -->
+        <div class="btn-group">
+            <button type="submit" class="btn">
+                <i class="fas fa-save"></i> Lagre svar
+            </button>
+            <button type="button" id="email-btn" class="btn btn-secondary">
+                <i class="fas fa-envelope"></i> Del via e-post
+            </button>
+            <button type="button" id="share-btn" class="btn btn-secondary">
+                <i class="fas fa-link"></i> Generer delbar lenke
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Scripts -->
+<!-- Load Utilities First -->
+<script src="utils.js" nonce="randomQuizNonce2024"></script>
+
+<!-- Load Core Functionality -->
+<script src="quiz-config.js" nonce="randomQuizNonce2024"></script>
+<script src="auth.js" nonce="randomQuizNonce2024"></script>
+<script src="quiz-functions.js" nonce="randomQuizNonce2024"></script>
+
+<!-- Load Additional Features -->
+<script src="theme-toggle.js" nonce="randomQuizNonce2024"></script>
+<script src="export-functions.js" nonce="randomQuizNonce2024"></script>
+
+<!-- HTML2PDF for PDF Export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" 
+        integrity="sha512-GgCBbdRk/r+IHWAOTmKR0r0GFDkFnKn9JgWVwM7cxnOoQddFrweHzRDVET7E7qz3ey6LkVAitqurwr0OfmAlFA==" 
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- Initialization Script -->
+<script nonce="randomQuizNonce2024">
+    document.addEventListener('DOMContentLoaded', () => {
+        // Replace inline onclick events with event listeners
+        document.getElementById('logout-btn').addEventListener('click', () => AUTH.logout());
+        
+        document.getElementById('quizForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            validateForm(event);
+        });
+
+        document.getElementById('email-btn').addEventListener('click', () => EXPORT.shareViaEmail());
+        
+        document.getElementById('share-btn').addEventListener('click', () => EXPORT.generateShareableLink());
+
+        // Input validation and sanitization
+        const groupNameInput = document.getElementById('groupName');
+        groupNameInput.addEventListener('input', (e) => {
+            e.target.value = UTILS.string.sanitize(e.target.value);
+        });
+    });
+</script>
+
+<!--Start of Tawk.to Script-->
+<script type="text/javascript" nonce="randomQuizNonce2024">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/6769ef41af5bfec1dbe0cf3e/1ifqst6ms';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','anonymous');
+    s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
 </body>
 </html>
