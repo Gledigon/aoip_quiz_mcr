@@ -18,9 +18,9 @@ const AUTH = {
         modal.innerHTML = `
             <div class="auth-content">
                 <div class="veritas-shield" style="text-align: center; margin-bottom: 2rem;">
-                    <i class="fas fa-shield-alt" style="font-size: 3rem; color: var(--harvard-crimson);"></i>
+                    <i class="fas fa-shield-alt" style="font-size: 3rem; color: var(--corporate-red);"></i>
                 </div>
-                <h2>Velkommen til AoIP Quiz</h2>
+                <h2>MCR AoIP Challenge</h2>
                 <form id="loginForm">
                     <div class="form-group">
                         <label for="quizPassword">
@@ -39,9 +39,6 @@ const AUTH = {
                         <i class="fas fa-sign-in-alt"></i> Fortsett
                     </button>
                 </form>
-                <div style="text-align: center; margin-top: 2rem; font-size: 0.9rem; color: var(--text-secondary); font-family: var(--font-serif); font-style: italic;">
-                    "Veritas" - I søken etter sannhet
-                </div>
             </div>
         `;
         document.body.appendChild(modal);
@@ -134,17 +131,6 @@ const AUTH = {
                 alert('Kunne ikke logge ut. Vennligst prøv igjen.');
             }
         }
-    },
-
-    // Helper method to check if local storage is available
-    isLocalStorageAvailable: function() {
-        try {
-            localStorage.setItem('test', 'test');
-            localStorage.removeItem('test');
-            return true;
-        } catch (e) {
-            return false;
-        }
     }
 };
 
@@ -159,16 +145,12 @@ style.textContent = `
     
     .shake {
         animation: shake 0.5s ease-in-out;
-        border-color: var(--harvard-crimson) !important;
+        border-color: var(--corporate-red) !important;
     }
 `;
 document.head.appendChild(style);
 
 // Initialize authentication when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    if (AUTH.isLocalStorageAvailable()) {
-        AUTH.initialize();
-    } else {
-        alert('Din nettleser støtter ikke lokal lagring. Vennligst aktiver dette eller bruk en annen nettleser.');
-    }
+    AUTH.initialize();
 });
