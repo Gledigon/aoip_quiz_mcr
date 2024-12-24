@@ -97,13 +97,55 @@
     <!-- Chat functionality -->
     <script>
     const CHAT = {
+        tawkId: '6769ef41af5bfec1dbe0cf3e/1ifsbuaf1',
+        isLoaded: false,
+
         start: function() {
-            // Toggle Tawk.to widget if already loaded
-            if (window.Tawk_API && typeof Tawk_API.toggle === 'function') {
-                Tawk_API.toggle();
+            if (!this.isLoaded) {
+                this.loadTawkTo();
+            } else {
+                // Ensure Tawk_API exists before calling maximize
+                if (window.Tawk_API && typeof Tawk_API.maximize === 'function') {
+                    Tawk_API.maximize();
+                }
             }
+        },
+
+        loadTawkTo: function() {
+            // Ensure we don't load multiple times
+            if (this.isLoaded) return;
+
+            // Tawk_API configuration
+            window.Tawk_API = window.Tawk_API || {};
+            window.Tawk_API.onLoad = () => {
+                this.isLoaded = true;
+                // Attempt to maximize chat widget
+                if (typeof Tawk_API.maximize === 'function') {
+                    Tawk_API.maximize();
+                }
+            };
+
+            // Create and insert script element
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.async = true;
+            script.src = `https://embed.tawk.to/${this.tawkId}`;
+            script.charset = 'UTF-8';
+            script.crossOrigin = 'anonymous';
+
+            // Insert script into document
+            const firstScript = document.getElementsByTagName('script')[0];
+            firstScript.parentNode.insertBefore(script, firstScript);
         }
     };
+
+    // Automatically start chat when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        const startChatBtn = document.getElementById('startChat');
+        if (startChatBtn) {
+            startChatBtn.addEventListener('click', () => CHAT.start());
+        }
+    });
     </script>
 
     <!--Start of Tawk.to Script-->
