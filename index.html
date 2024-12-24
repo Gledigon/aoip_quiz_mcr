@@ -28,8 +28,56 @@
 
     <!-- Main Content -->
     <div id="main-content" class="container">
-        <!-- Rest of your existing content -->
-        <!-- ... -->
+        <!-- Main Header -->
+        <header class="header">
+            <h1>Mikkelsens AoIP Quiz</h1>
+            <p>Besvar spørsmålene og lagre/print som PDF</p>
+        </header>
+
+        <!-- Quiz Form -->
+        <form id="quizForm" onsubmit="return validateForm(event)">
+            <!-- Group Info Section -->
+            <div class="group-info">
+                <div class="form-group">
+                    <label for="groupName">Gruppenavn</label>
+                    <input 
+                        type="text" 
+                        id="groupName" 
+                        name="groupName"
+                        required 
+                        pattern="[A-Za-zÆØÅæøå0-9\s\-_]{2,50}"
+                        placeholder="Skriv inn navnet på gruppen"
+                        maxlength="50"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="date">Dato</label>
+                    <input 
+                        type="date" 
+                        id="date" 
+                        name="date"
+                        required
+                        min="2024-01-01"
+                    >
+                </div>
+            </div>
+
+            <!-- Questions Container -->
+            <div id="questionContainer" class="question-container"></div>
+
+            <!-- Form Buttons -->
+            <div class="btn-group">
+                <button type="submit" class="btn">
+                    <i class="fas fa-save"></i> Lagre svar
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="validateAndPrint()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="EXPORT.generateShareableLink()">
+                    <i class="fas fa-link"></i> Generer delbar lenke
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Scripts -->
@@ -40,9 +88,8 @@
     <script src="theme-toggle.js"></script>
     <script src="export-functions.js"></script>
 
-    <!-- Tawk.to script will be loaded dynamically when needed -->
+    <!-- Chat functionality -->
     <script>
-    // Chat functionality
     const CHAT = {
         isLoaded: false,
         tawkId: '6769ef41af5bfec1dbe0cf3e/1ifqst6ms',
