@@ -20,10 +20,15 @@
     <!-- Password Entry Modal -->
     <div id="passwordModal" class="auth-modal">
         <div class="auth-content">
+            <div class="veritas-shield" style="text-align: center; margin-bottom: 2rem;">
+                <i class="fas fa-shield-alt" style="font-size: 3rem; color: var(--corporate-red);"></i>
+            </div>
             <h2>MCR AoIP Challenge</h2>
             <form id="passwordForm" onsubmit="return checkPassword(event)">
                 <div class="form-group">
-                    <label for="challengePassword">Oppgi passord</label>
+                    <label for="challengePassword">
+                        <i class="fas fa-lock"></i> Oppgi passord
+                    </label>
                     <input 
                         type="password" 
                         id="challengePassword" 
@@ -31,10 +36,11 @@
                         required
                         placeholder="Skriv inn challenger-passord"
                     >
+                    <div class="error-message" id="loginError"></div>
                 </div>
-                <div class="btn-group">
-                    <button type="submit" class="btn">Fortsett</button>
-                </div>
+                <button type="submit" class="btn">
+                    <i class="fas fa-sign-in-alt"></i> Fortsett
+                </button>
             </form>
         </div>
     </div>
@@ -87,23 +93,6 @@
                     </div>
                 </div>
 
-                <!-- Image Upload Section -->
-                <div class="form-group image-upload">
-                    <label for="imageUpload" class="btn btn-secondary">
-                        <i class="fas fa-cloud-upload-alt"></i> Last opp bilder
-                        <input 
-                            type="file" 
-                            id="imageUpload" 
-                            name="imageUpload" 
-                            accept="image/*" 
-                            multiple
-                            style="display: none;"
-                            onchange="UPLOAD.handleImageUpload(event)"
-                        >
-                    </label>
-                    <div id="imagePreviewContainer" class="image-upload-container"></div>
-                </div>
-
                 <!-- Questions Container -->
                 <div id="questionContainer" class="question-container"></div>
 
@@ -137,12 +126,13 @@
     <!-- Authentication and Page Control Script -->
     <script>
     // Correct password for accessing the challenge
-    const CHALLENGE_PASSWORD = 'mcr';
+    const CHALLENGE_PASSWORD = 'mcr!';
 
     // Password check function
     function checkPassword(event) {
         event.preventDefault();
         const passwordInput = document.getElementById('challengePassword');
+        const errorDiv = document.getElementById('loginError');
         const enteredPassword = passwordInput.value;
 
         if (enteredPassword === CHALLENGE_PASSWORD) {
@@ -161,12 +151,17 @@
                 const defaultQuestions = [
                     {
                         id: 1,
-                        text: "Spørsmål 1: Beskriv AoIP-arkitekturen",
+                        text: "Toby er onsite med en Via boks, vi kan se Via boksen i Cloud Webgui, men den får ikke koble seg til vårt mottak",
                         type: "textarea"
                     },
                     {
                         id: 2,
-                        text: "Spørsmål 2: Forklar fordelene med AoIP",
+                        text: "Hvordan verifiserer du at du mottar lyd fra en Prodys Quantum sender?",
+                        type: "textarea"
+                    },
+                    {
+                        id: 3,
+                        text: "Hva gjør du hvis lydstrømmen fra en Tieline Via plutselig forsvinner?",
                         type: "textarea"
                     }
                 ];
@@ -190,9 +185,12 @@
                     
                     questionContainer.appendChild(questionCard);
                 });
+            }
         } else {
-            alert('Feil passord. Vennligst prøv igjen.');
+            errorDiv.textContent = 'Feil passord. Vennligst prøv igjen.';
+            errorDiv.style.display = 'block';
             passwordInput.value = '';
+            passwordInput.focus();
         }
         return false;
     }
@@ -210,115 +208,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('passwordModal').style.display = 'flex';
     });
-    </script>
-
-    <!-- Image Upload and Resize Script -->
-    <script>
-    // Image Resize Utility
-    const ImageResize = {
-        MAX_WIDTH: 1024,
-        MAX_HEIGHT: 1024,
-        MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
-
-        resizeImage: async (file) => {
-            if (file.size > ImageResize.MAX_FILE_SIZE) {
-                alert('Bildet er for stort. Maks størrelse er 5MB.');
-                return null;
-            }
-
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > ImageResize.MAX_WIDTH || height > ImageResize.MAX_HEIGHT) {
-                            const ratio = Math.min(
-                                ImageResize.MAX_WIDTH / width,
-                                ImageResize.MAX_HEIGHT / height
-                            );
-                            width = Math.round(width * ratio);
-                            height = Math.round(height * ratio);
-                        }
-
-                        const canvas = document.createElement('canvas');
-                        canvas.width = width;
-                        canvas.height = height;
-
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        canvas.toBlob((blob) => {
-                            const resizedFile = new File([blob], file.name, {
-                                type: file.type,
-                                lastModified: Date.now()
-                            });
-                            resolve(resizedFile);
-                        }, file.type);
-                    };
-                    img.src = event.target.result;
-                };
-                reader.onerror = (error) => reject(error);
-                reader.readAsDataURL(file);
-            });
-        }
-    };
-
-    // Upload Handling
-    const UPLOAD = {
-        uploadedFiles: [],
-
-        handleImageUpload: async (event) => {
-            const files = Array.from(event.target.files);
-            const previewContainer = document.getElementById('imagePreviewContainer');
-
-            for (const file of files) {
-                try {
-                    const resizedFile = await ImageResize.resizeImage(file);
-                    if (!resizedFile) continue;
-
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const previewItem = document.createElement('div');
-                        previewItem.className = 'image-preview-item';
-                        
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.alt = 'Opplastet bilde';
-                        
-                        const removeBtn = document.createElement('button');
-                        removeBtn.innerHTML = '&times;';
-                        removeBtn.className = 'remove-image';
-                        removeBtn.onclick = () => UPLOAD.removeImage(previewItem, resizedFile);
-
-                        previewItem.appendChild(removeBtn);
-                        previewItem.appendChild(img);
-                        previewContainer.appendChild(previewItem);
-
-                        UPLOAD.uploadedFiles.push(resizedFile);
-                    };
-                    reader.readAsDataURL(resizedFile);
-                } catch (error) {
-                    console.error('Feil ved bildeopplasting:', error);
-                    alert('Det oppstod en feil ved bildeopplasting.');
-                }
-            }
-
-            event.target.value = '';
-        },
-
-        removeImage: (previewElement, file) => {
-            previewElement.remove();
-            const index = UPLOAD.uploadedFiles.indexOf(file);
-            if (index > -1) {
-                UPLOAD.uploadedFiles.splice(index, 1);
-            }
-        },
-
-        getUploadedFiles: () => UPLOAD.uploadedFiles
-    };
     </script>
 
     <!-- Chat functionality -->
@@ -347,36 +236,24 @@
         loadTawkTo: function() {
             if (this.isLoaded) return;
 
-            const container = document.createElement('div');
-            container.id = 'tawk-container';
-            document.body.appendChild(container);
-
-            window.Tawk_API = window.Tawk_API || {};
+            var s1 = document.createElement("script"),
+                s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = 'https://embed.tawk.to/' + this.tawkId;
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
             
-            window.Tawk_API.onLoad = () => {
-                try {
-                    this.isLoaded = true;
-                    if (typeof Tawk_API.maximize === 'function') {
-                        Tawk_API.maximize();
-                    }
-                } catch (error) {
-                    console.error('Tawk.to load error:', error);
-                }
-            };
+            this.isLoaded = true;
 
-            window.Tawk_API.onError = (error) => {
-                console.error('Tawk.to script error:', error);
-            };
-
-            const script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.async = true;
-            script.src = `https://embed.tawk.to/${this.tawkId}`;
-            script.charset = 'UTF-8';
-            script.crossOrigin = 'anonymous';
-
-            const firstScript = document.getElementsByTagName('script')[0];
-            firstScript.parentNode.insertBefore(script, firstScript);
+            // Update visitor name if groupName is filled
+            const groupName = document.getElementById('groupName')?.value;
+            if (groupName) {
+                window.Tawk_API = window.Tawk_API || {};
+                Tawk_API.visitor = {
+                    name: groupName
+                };
+            }
         }
     };
 
@@ -385,23 +262,7 @@
         if (startChatBtn) {
             startChatBtn.addEventListener('click', () => CHAT.start());
         }
-        
-        CHAT.start();
     });
     </script>
-
-    <!--Start of Tawk.to Script-->
-    <script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-    (function(){
-    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-    s1.async=true;
-    s1.src='https://embed.tawk.to/6769ef41af5bfec1dbe0cf3e/1ifsbuaf1';
-    s1.charset='UTF-8';
-    s1.setAttribute('crossorigin','*');
-    s0.parentNode.insertBefore(s1,s0);
-    })();
-    </script>
-    <!--End of Tawk.to Script-->
 </body>
 </html>
