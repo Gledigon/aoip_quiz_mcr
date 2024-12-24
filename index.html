@@ -155,7 +155,41 @@
             // Load questions if function exists
             if (typeof loadQuestions === 'function') {
                 loadQuestions();
-            }
+            } else {
+                // Fallback questions if no loadQuestions function
+                const questionContainer = document.getElementById('questionContainer');
+                const defaultQuestions = [
+                    {
+                        id: 1,
+                        text: "Spørsmål 1: Beskriv AoIP-arkitekturen",
+                        type: "textarea"
+                    },
+                    {
+                        id: 2,
+                        text: "Spørsmål 2: Forklar fordelene med AoIP",
+                        type: "textarea"
+                    }
+                ];
+
+                defaultQuestions.forEach(question => {
+                    const questionCard = document.createElement('div');
+                    questionCard.className = 'question-card';
+                    
+                    const questionText = document.createElement('div');
+                    questionText.className = 'question-text';
+                    questionText.textContent = question.text;
+                    
+                    const answerInput = document.createElement('textarea');
+                    answerInput.id = `question${question.id}`;
+                    answerInput.name = `question${question.id}`;
+                    answerInput.className = 'form-control';
+                    answerInput.placeholder = 'Skriv ditt svar her...';
+
+                    questionCard.appendChild(questionText);
+                    questionCard.appendChild(answerInput);
+                    
+                    questionContainer.appendChild(questionCard);
+                });
         } else {
             alert('Feil passord. Vennligst prøv igjen.');
             passwordInput.value = '';
