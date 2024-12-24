@@ -182,20 +182,79 @@ textarea:focus {
     transform: translateY(-1px);
 }
 
+/* Updated Secondary Buttons */
 .btn-secondary {
-    background: var(--text-secondary);
+    background: var(--corporate-grey);
     color: white;
+    font-weight: 500;
+    border: 1px solid transparent;
 }
-
 .btn-secondary:hover {
-    background: #5a6268;
+    background: var(--corporate-dark);
+    border-color: var(--corporate-red);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Button Groups */
+/* Image Upload Section */
+.image-upload {
+    border: 2px dashed var(--corporate-red);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    margin-top: 1rem;
+    background: var(--bg-secondary);
+    transition: all 0.3s ease;
+}
+.image-upload label {
+    background: var(--corporate-grey);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.image-upload label:hover {
+    background: var(--corporate-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.image-upload.drag-over {
+    border-color: var(--corporate-red);
+    background: rgba(165, 28, 48, 0.1);
+}
+
+/* Button Group Improvements */
 .btn-group {
     display: flex;
     gap: 1rem;
     margin-top: 2rem;
+}
+.btn-group .btn {
+    flex: 1;
+    justify-content: center;
+}
+
+/* Dark theme adjustments */
+.dark .btn-secondary {
+    background: var(--corporate-grey);
+    color: white;
+}
+.dark .btn-secondary:hover {
+    background: var(--corporate-dark);
+    border-color: var(--corporate-red);
+}
+.dark .image-upload {
+    border-color: var(--corporate-red);
+    background: var(--bg-secondary);
+}
+.dark .image-upload label {
+    background: var(--corporate-grey);
+    color: white;
 }
 
 /* Theme Toggle */
