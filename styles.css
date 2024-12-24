@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 /* Root Variables */
 :root {
     --corporate-red: #A51C30;
@@ -22,8 +24,6 @@
 }
 
 /* Base Styles */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 body {
     background: var(--bg-primary);
     color: var(--text-primary);
