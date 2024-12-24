@@ -17,76 +17,75 @@ const AUTH = {
         modal.className = 'auth-modal';
         modal.innerHTML = `
             <div class="auth-content">
+                <div class="quiz-logo">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
                 <h2>Logg inn for å starte quizen</h2>
                 <form id="loginForm">
                     <div class="form-group">
-                        <label for="quizPassword">Passord</label>
+                        <label for="quizPassword">
+                            <i class="fas fa-lock"></i> Passord
+                        </label>
                         <input 
                             type="password" 
                             id="quizPassword" 
                             required
-                            autocomplete="current-password"
+                            placeholder="Skriv inn passordet"
                         >
+                        <div class="error-message" id="loginError"></div>
                     </div>
-                    <div class="error-message" id="loginError"></div>
-                    <button type="submit" class="btn">Logg inn</button>
+                    <button type="submit" class="btn">
+                        <i class="fas fa-sign-in-alt"></i> Logg inn
+                    </button>
                 </form>
             </div>
         `;
         document.body.appendChild(modal);
 
-        // Add form submit handler
-        const form = modal.querySelector('#loginForm');
-        form.addEventListener('submit', (e) => {
+        const loginForm = document.getElementById('loginForm');
+        loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             this.validateQuizLogin();
         });
 
-        // Focus on password input
-        setTimeout(() => {
-            document.getElementById('quizPassword')?.focus();
-        }, 100);
+        const passwordInput = document.getElementById('quizPassword');
+        if (passwordInput) {
+            passwordInput.focus();
+        }
     },
 
     validateQuizLogin: function() {
         const passwordInput = document.getElementById('quizPassword');
-        const errorDiv = document.getElementById('loginError');
-        
-        if (!passwordInput || !errorDiv) return;
-
-        const password = passwordInput.value;
+        const password = passwordInput ? passwordInput.value : '';
         
         if (password === this.QUIZ_PASSWORD) {
-            try {
-                localStorage.setItem('quizAuth', 'true');
-                const modal = document.querySelector('.auth-modal');
-                if (modal) modal.remove();
-                location.reload();
-            } catch (error) {
-                console.error('Login error:', error);
-                errorDiv.textContent = 'Kunne ikke logge inn. Prøv igjen.';
+            localStorage.setItem('quizAuth', 'true');
+            const modal = document.querySelector('.auth-modal');
+            if (modal) {
+                modal.remove();
+            }
+            window.location.reload();
+        } else {
+            const errorDiv = document.getElementById('loginError');
+            if (errorDiv) {
+                errorDiv.textContent = 'Feil passord';
                 errorDiv.style.display = 'block';
             }
-        } else {
-            errorDiv.textContent = 'Feil passord';
-            errorDiv.style.display = 'block';
-            passwordInput.value = '';
-            passwordInput.focus();
+            if (passwordInput) {
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
         }
     },
 
     logout: function() {
         if (confirm('Er du sikker på at du vil logge ut?')) {
-            try {
-                localStorage.removeItem('quizAuth');
-                location.reload();
-            } catch (error) {
-                console.error('Logout error:', error);
-                alert('Kunne ikke logge ut. Prøv igjen.');
-            }
+            localStorage.removeItem('quizAuth');
+            window.location.reload();
         }
     }
 };
 
-// Initialize authentication on page load
-document.addEventListener('DOMContentLoaded', () => AUTH.initialize());
+document.addEventListener('DOMContentLoaded', () => {
+    AUTH.initialize();
+});
