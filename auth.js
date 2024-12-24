@@ -18,7 +18,7 @@ const AUTH = {
         modal.innerHTML = `
             <div class="auth-content">
                 <h2>Logg inn for å starte quizen</h2>
-                <form id="loginForm" onsubmit="return AUTH.validateQuizLogin(event)">
+                <form id="loginForm">
                     <div class="form-group">
                         <label for="quizPassword">Passord</label>
                         <input 
@@ -35,15 +35,26 @@ const AUTH = {
         `;
         document.body.appendChild(modal);
 
+        // Add form submit handler
+        const form = modal.querySelector('#loginForm');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.validateQuizLogin();
+        });
+
         // Focus on password input
         setTimeout(() => {
             document.getElementById('quizPassword')?.focus();
         }, 100);
     },
 
-    validateQuizLogin: function(event) {
-        event.preventDefault();
-        const password = document.getElementById('quizPassword')?.value;
+    validateQuizLogin: function() {
+        const passwordInput = document.getElementById('quizPassword');
+        const errorDiv = document.getElementById('loginError');
+        
+        if (!passwordInput || !errorDiv) return;
+
+        const password = passwordInput.value;
         
         if (password === this.QUIZ_PASSWORD) {
             try {
@@ -53,21 +64,15 @@ const AUTH = {
                 location.reload();
             } catch (error) {
                 console.error('Login error:', error);
-                this.showNotification('Kunne ikke logge inn', 'error');
-            }
-        } else {
-            const errorDiv = document.getElementById('loginError');
-            if (errorDiv) {
-                errorDiv.textContent = 'Feil passord';
+                errorDiv.textContent = 'Kunne ikke logge inn. Prøv igjen.';
                 errorDiv.style.display = 'block';
             }
-            const passwordInput = document.getElementById('quizPassword');
-            if (passwordInput) {
-                passwordInput.value = '';
-                passwordInput.focus();
-            }
+        } else {
+            errorDiv.textContent = 'Feil passord';
+            errorDiv.style.display = 'block';
+            passwordInput.value = '';
+            passwordInput.focus();
         }
-        return false;
     },
 
     logout: function() {
@@ -77,21 +82,9 @@ const AUTH = {
                 location.reload();
             } catch (error) {
                 console.error('Logout error:', error);
-                this.showNotification('Kunne ikke logge ut', 'error');
+                alert('Kunne ikke logge ut. Prøv igjen.');
             }
         }
-    },
-
-    showNotification: function(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.classList.add('fade-out');
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
     }
 };
 
