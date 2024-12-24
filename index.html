@@ -91,67 +91,27 @@
     <!-- Chat functionality -->
     <script>
     const CHAT = {
-        isLoaded: false,
-        tawkId: '6769ef41af5bfec1dbe0cf3e/1ifqst6ms',
-        
         start: function() {
-            if (!this.isLoaded) {
-                this.loadTawkTo();
-            } else {
-                // Ensure Tawk_API exists before calling toggle
-                if (window.Tawk_API && typeof Tawk_API.toggle === 'function') {
-                    Tawk_API.toggle();
-                }
-            }
-        },
-
-        loadTawkTo: function() {
-            // Ensure we don't load multiple times
-            if (this.isLoaded) return;
-
-            // Create Tawk_API object if it doesn't exist
-            window.Tawk_API = window.Tawk_API || {};
-
-            // Create and insert script element
-            const script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.async = true;
-            script.src = `https://embed.tawk.to/${this.tawkId}`;
-            script.charset = 'UTF-8';
-            script.crossOrigin = 'anonymous';
-
-            // Add onload handler to set isLoaded
-            script.onload = () => {
-                this.isLoaded = true;
-                this.updateVisitorName();
-            };
-
-            // Insert script into document
-            const firstScript = document.getElementsByTagName('script')[0];
-            firstScript.parentNode.insertBefore(script, firstScript);
-        },
-
-        updateVisitorName: function() {
-            const groupName = document.getElementById('groupName')?.value;
-            if (groupName) {
-                Tawk_API.visitor = {
-                    name: groupName
-                };
+            // Toggle Tawk.to widget if already loaded
+            if (window.Tawk_API && typeof Tawk_API.toggle === 'function') {
+                Tawk_API.toggle();
             }
         }
     };
-
-    // Update visitor name when group name changes
-    document.addEventListener('DOMContentLoaded', () => {
-        const groupNameInput = document.getElementById('groupName');
-        if (groupNameInput) {
-            groupNameInput.addEventListener('change', () => {
-                if (window.Tawk_API && CHAT.isLoaded) {
-                    CHAT.updateVisitorName();
-                }
-            });
-        }
-    });
     </script>
+
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/6769ef41af5bfec1dbe0cf3e/1ifsbuaf1';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+    })();
+    </script>
+    <!--End of Tawk.to Script-->
 </body>
 </html>
