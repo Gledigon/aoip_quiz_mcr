@@ -41,7 +41,8 @@ const CONFIG = {
 const QUESTIONS = [
     {
         id: 1,
-        text: "Hvilke porter må være åpne i brannmuren for å motta lyd fra en Tieline Via enhet?",
+        text: "Toby er onsite med en Via boks, vi kan se Via boksen i Cloud Webgui, men den får ikke koble seg til vårt mottak",
+        "Kan det være et nettverks problem. Hvordan går vi frem for å feilsøke problemet", 
         placeholder: "Beskriv nødvendige porter og protokoller...",
         allowImage: true,
         required: true,
