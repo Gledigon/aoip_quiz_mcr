@@ -63,6 +63,22 @@
                 </div>
             </div>
 
+            <!-- Image Upload Section -->
+            <div class="form-group image-upload">
+                <label for="imageUpload">
+                    <i class="fas fa-cloud-upload-alt"></i> Last opp bilde
+                    <input 
+                        type="file" 
+                        id="imageUpload" 
+                        name="imageUpload" 
+                        accept="image/*" 
+                        style="display: none;"
+                        onchange="UPLOAD.handleImageUpload(event)"
+                    >
+                </label>
+                <div id="imagePreview" class="image-preview"></div>
+            </div>
+
             <!-- Questions Container -->
             <div id="questionContainer" class="question-container"></div>
 
@@ -93,6 +109,122 @@
     <script src="quiz-functions.js"></script>
     <script src="theme-toggle.js"></script>
     <script src="export-functions.js"></script>
+
+    <!-- Image Upload and Resize Script -->
+    <script>
+    // Image Resize Utility
+    const ImageResize = {
+        // Maximum image dimensions
+        MAX_WIDTH: 1024,
+        MAX_HEIGHT: 1024,
+        MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
+
+        // Resize image to fit within max dimensions while maintaining aspect ratio
+        resizeImage: async (file) => {
+            // Check file size
+            if (file.size > ImageResize.MAX_FILE_SIZE) {
+                alert('Bildet er for stort. Maks størrelse er 5MB.');
+                return null;
+            }
+
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // Calculate new dimensions
+                        let width = img.width;
+                        let height = img.height;
+
+                        // Resize if needed
+                        if (width > ImageResize.MAX_WIDTH || height > ImageResize.MAX_HEIGHT) {
+                            const ratio = Math.min(
+                                ImageResize.MAX_WIDTH / width,
+                                ImageResize.MAX_HEIGHT / height
+                            );
+                            width = Math.round(width * ratio);
+                            height = Math.round(height * ratio);
+                        }
+
+                        // Create canvas for resizing
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        // Draw resized image
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Convert to blob
+                        canvas.toBlob((blob) => {
+                            // Create new File object
+                            const resizedFile = new File([blob], file.name, {
+                                type: file.type,
+                                lastModified: Date.now()
+                            });
+                            resolve(resizedFile);
+                        }, file.type);
+                    };
+                    img.src = event.target.result;
+                };
+                reader.onerror = (error) => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+    };
+
+    // Upload Handling
+    const UPLOAD = {
+        handleImageUpload: async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                // Resize image
+                const resizedFile = await ImageResize.resizeImage(file);
+                if (!resizedFile) return;
+
+                // Create preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewContainer = document.getElementById('imagePreview');
+                    previewContainer.innerHTML = `
+                        <img src="${e.target.result}" alt="Opplastet bilde" style="max-width: 100%; max-height: 300px;">
+                        <button type="button" onclick="UPLOAD.removeImage()" class="btn btn-secondary" style="margin-top: 10px;">
+                            <i class="fas fa-trash"></i> Fjern bilde
+                        </button>
+                    `;
+                };
+                reader.readAsDataURL(resizedFile);
+
+                // Store resized file for form submission
+                UPLOAD.uploadedFile = resizedFile;
+            } catch (error) {
+                console.error('Feil ved bildeopplasting:', error);
+                alert('Det oppstod en feil ved bildeopplasting.');
+            }
+        },
+
+        removeImage: () => {
+            const fileInput = document.getElementById('imageUpload');
+            const previewContainer = document.getElementById('imagePreview');
+            
+            // Clear file input
+            fileInput.value = '';
+            
+            // Clear preview
+            previewContainer.innerHTML = '';
+            
+            // Remove stored file
+            UPLOAD.uploadedFile = null;
+        },
+
+        // Method to get uploaded file (can be used in form submission)
+        getUploadedFile: () => {
+            return UPLOAD.uploadedFile;
+        }
+    };
+    </script>
 
     <!-- Chat functionality -->
     <script>
