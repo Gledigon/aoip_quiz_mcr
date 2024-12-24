@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.tawk.to https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com; 
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.tawk.to https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; 
         script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.tawk.to https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; 
-        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://*.tawk.to https://fonts.googleapis.com; 
+        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://*.tawk.to; 
         img-src 'self' data: blob: https://*.tawk.to https://cdnjs.cloudflare.com; 
-        font-src 'self' https://cdnjs.cloudflare.com https://*.tawk.to https://fonts.gstatic.com https://fonts.googleapis.com; 
+        font-src 'self' https://cdnjs.cloudflare.com https://*.tawk.to; 
         connect-src 'self' https://*.tawk.to wss://*.tawk.to; 
         frame-src https://*.tawk.to;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -15,102 +15,187 @@
     <title>MCR AoIP Challenge</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Rest of the previous HTML content remains the same -->
+    <!-- Authentication Modal -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-content">
+            <h2>Logg inn</h2>
+            <form id="loginForm" onsubmit="return AUTH.login(event)">
+                <div class="form-group">
+                    <label for="username">Brukernavn</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username"
+                        required
+                        placeholder="Skriv inn ditt brukernavn"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="password">Passord</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password"
+                        required
+                        placeholder="Skriv inn ditt passord"
+                    >
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn">Logg inn</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <!-- Chat functionality -->
+    <!-- Main Content (Hidden by default) -->
+    <div id="mainContent" style="display: none;">
+        <!-- Logout Button -->
+        <button onclick="AUTH.logout()" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Logg ut
+        </button>
+
+        <!-- Theme Toggle -->
+        <div id="theme-toggle" class="theme-toggle" title="Bytt tema">
+            <i class="fas fa-moon"></i>
+        </div>
+
+        <!-- Main Content Container -->
+        <div id="main-content" class="container">
+            <!-- Main Header -->
+            <header class="header">
+                <h1>MCR AoIP Challenge</h1>
+                <p>Besvar spørsmålene og lagre/print som PDF</p>
+            </header>
+
+            <!-- Quiz Form -->
+            <form id="quizForm" onsubmit="return validateForm(event)">
+                <!-- Group Info Section -->
+                <div class="group-info">
+                    <div class="form-group">
+                        <label for="groupName">Gruppenavn</label>
+                        <input 
+                            type="text" 
+                            id="groupName" 
+                            name="groupName"
+                            required 
+                            pattern="[A-Za-zÆØÅæøå0-9\s\-_]{2,50}"
+                            placeholder="Skriv inn navnet på gruppen"
+                            maxlength="50"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="date">Dato</label>
+                        <input 
+                            type="date" 
+                            id="date" 
+                            name="date"
+                            required
+                            min="2024-01-01"
+                        >
+                    </div>
+                </div>
+
+                <!-- Image Upload Section -->
+                <div class="form-group image-upload">
+                    <label for="imageUpload" class="btn btn-secondary">
+                        <i class="fas fa-cloud-upload-alt"></i> Last opp bilder
+                        <input 
+                            type="file" 
+                            id="imageUpload" 
+                            name="imageUpload" 
+                            accept="image/*" 
+                            multiple
+                            style="display: none;"
+                            onchange="UPLOAD.handleImageUpload(event)"
+                        >
+                    </label>
+                    <div id="imagePreviewContainer" class="image-upload-container"></div>
+                </div>
+
+                <!-- Questions Container -->
+                <div id="questionContainer" class="question-container"></div>
+
+                <!-- Form Buttons -->
+                <div class="btn-group">
+                    <button type="submit" class="btn">
+                        <i class="fas fa-save"></i> Lagre svar
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="validateAndPrint()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="EXPORT.generateShareableLink()">
+                        <i class="fas fa-link"></i> Generer delbar lenke
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Chat Button -->
+        <button id="startChat" onclick="CHAT.start()" class="chat-btn">
+            <i class="fas fa-comments"></i> Start Chat
+        </button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="utils.js"></script>
+    <script src="quiz-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="quiz-functions.js"></script>
+    <script src="theme-toggle.js"></script>
+    <script src="export-functions.js"></script>
+
+    <!-- Authentication Script -->
     <script>
-    const CHAT = {
-        tawkId: '6769ef41af5bfec1dbe0cf3e/1ifsbuaf1',
-        isLoaded: false,
+    const AUTH = {
+        login: function(event) {
+            event.preventDefault();
+            
+            // Get username and password
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
-        start: function() {
-            // Attempt to load or maximize Tawk.to chat
-            if (window.Tawk_API) {
-                try {
-                    if (typeof Tawk_API.maximize === 'function') {
-                        Tawk_API.maximize();
-                    } else if (typeof Tawk_API.toggle === 'function') {
-                        Tawk_API.toggle();
-                    }
-                } catch (error) {
-                    console.error('Tawk.to chat error:', error);
+            // Placeholder for actual authentication logic
+            // Replace with your actual authentication method
+            if (username && password) {
+                // Hide auth modal
+                document.getElementById('authModal').style.display = 'none';
+                
+                // Show main content
+                document.getElementById('mainContent').style.display = 'block';
+
+                // Optional: Load questions or perform other post-login actions
+                if (typeof loadQuestions === 'function') {
+                    loadQuestions();
                 }
-                return;
-            }
 
-            // Load Tawk.to if not already loaded
-            this.loadTawkTo();
+                return true;
+            } else {
+                alert('Vennligst fyll inn brukernavn og passord');
+                return false;
+            }
         },
 
-        loadTawkTo: function() {
-            // Ensure we don't load multiple times
-            if (this.isLoaded) return;
-
-            // Create container for Tawk.to widget
-            const container = document.createElement('div');
-            container.id = 'tawk-container';
-            document.body.appendChild(container);
-
-            // Tawk.to configuration
-            window.Tawk_API = window.Tawk_API || {};
+        logout: function() {
+            // Show auth modal
+            document.getElementById('authModal').style.display = 'flex';
             
-            // Maximize chat on load
-            window.Tawk_API.onLoad = () => {
-                try {
-                    this.isLoaded = true;
-                    if (typeof Tawk_API.maximize === 'function') {
-                        Tawk_API.maximize();
-                    }
-                } catch (error) {
-                    console.error('Tawk.to load error:', error);
-                }
-            };
+            // Hide main content
+            document.getElementById('mainContent').style.display = 'none';
 
-            // Error handling for script loading
-            window.Tawk_API.onError = (error) => {
-                console.error('Tawk.to script error:', error);
-            };
-
-            // Create and insert script
-            const script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.async = true;
-            script.src = `https://embed.tawk.to/${this.tawkId}`;
-            script.charset = 'UTF-8';
-            script.crossOrigin = 'anonymous';
-
-            const firstScript = document.getElementsByTagName('script')[0];
-            firstScript.parentNode.insertBefore(script, firstScript);
+            // Clear form fields
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
         }
     };
 
-    // Automatically try to start chat on page load
+    // Ensure auth modal is visible on page load
     document.addEventListener('DOMContentLoaded', () => {
-        const startChatBtn = document.getElementById('startChat');
-        if (startChatBtn) {
-            startChatBtn.addEventListener('click', () => CHAT.start());
-        }
-        
-        // Attempt to load chat automatically
-        CHAT.start();
+        document.getElementById('authModal').style.display = 'flex';
     });
     </script>
 
-    <!--Start of Tawk.to Script-->
-    <script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-    (function(){
-    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-    s1.async=true;
-    s1.src='https://embed.tawk.to/6769ef41af5bfec1dbe0cf3e/1ifsbuaf1';
-    s1.charset='UTF-8';
-    s1.setAttribute('crossorigin','*');
-    s0.parentNode.insertBefore(s1,s0);
-    })();
-    </script>
-    <!--End of Tawk.to Script-->
+    <!-- Rest of the previous scripts remain the same -->
 </body>
 </html>
